@@ -1106,8 +1106,7 @@ const UI = {
       if (monthData.carry !== 0) {
         const cr = document.createElement('div');
         cr.className = 'row';
-        cr.innerHTML = `<div class="desc" style="color:var(--text2)">Carry from prev</div>
-          <div><div class="amt">${monthData.carry >= 0 ? '+' : ''}${monthData.carry.toFixed(2)} €</div></div><div></div>`;
+        cr.innerHTML = `<div class="desc" style="color:var(--text2)">Carry from prev: ${monthData.carry >= 0 ? '+' : ''}${monthData.carry.toFixed(2)} €</div><div></div><div></div>`;
         l.appendChild(cr);
       }
       
