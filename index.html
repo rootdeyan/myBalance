@@ -1354,13 +1354,14 @@ const FileManager = {
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
       const now = new Date();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
       const day = String(now.getDate()).padStart(2, '0');
-      const year = String(now.getFullYear()).slice(-2);
+      const monthName = monthNames[now.getMonth()];
+      const yearFull = String(now.getFullYear());
       const hours = String(now.getHours()).padStart(2, '0');
       const minutes = String(now.getMinutes()).padStart(2, '0');
       const seconds = String(now.getSeconds()).padStart(2, '0');
-      link.download = `ST-${month}/${day}/${year}-${hours}.${minutes}.${seconds}.txt`;
+      link.download = `myBalance_${day}-${monthName}-${yearFull}_${hours}-${minutes}-${seconds}.txt`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
