@@ -23,6 +23,7 @@
   <meta name="twitter:image" content="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 630'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%' y1='0%' x2='100%' y2='100%'%3E%3Cstop offset='0%' style='stop-color:%230d0d18;stop-opacity:1'/%3E%3Cstop offset='100%' style='stop-color:%23161622;stop-opacity:1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1200' height='630' fill='url(%23grad)'/%3E%3Ctext x='600' y='120' font-size='80' font-weight='bold' fill='%2360a5fa' text-anchor='middle' font-family='Arial, sans-serif'%3E💰 Salary Tracker%3C/text%3E%3Crect x='100' y='180' width='500' height='380' rx='15' fill='%23161622' stroke='%2360a5fa' stroke-width='2'/%3E%3Ctext x='350' y='240' font-size='28' fill='%2394a3b8' text-anchor='middle' font-family='Arial, sans-serif'%3EIncome%3C/text%3E%3Ctext x='350' y='290' font-size='48' fill='%2334d399' font-weight='bold' text-anchor='middle' font-family='Arial, sans-serif'%3E2,450.00 €%3C/text%3E%3Ctext x='350' y='330' font-size='18' fill='%2394a3b8' text-anchor='middle' font-family='Arial, sans-serif'%3E≈ 4,795.32 BGN%3C/text%3E%3Crect x='600' y='180' width='500' height='380' rx='15' fill='%23161622' stroke='%2360a5fa' stroke-width='2'/%3E%3Ctext x='850' y='240' font-size='28' fill='%2394a3b8' text-anchor='middle' font-family='Arial, sans-serif'%3ESpent%3C/text%3E%3Ctext x='850' y='290' font-size='48' fill='%23f87171' font-weight='bold' text-anchor='middle' font-family='Arial, sans-serif'%3E845.50 €%3C/text%3E%3Ctext x='850' y='330' font-size='18' fill='%2394a3b8' text-anchor='middle' font-family='Arial, sans-serif'%3E≈ 1,655.41 BGN%3C/text%3E%3Ctext x='600' y='570' font-size='20' fill='%2394a3b8' text-anchor='middle' font-family='Arial, sans-serif'%3E📊 Track Income • Manage Expenses • EUR to BGN Conversion • Monthly Carry-Over%3C/text%3E%3C/svg%3E">
   <title>rootdeyan | myBalance &euro;</title>
   <link rel="canonical" href="https://rootdeyan.github.io/MySalaryTracker/">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="icon" type="image/svg+xml"
 href="data:image/svg+xml,
 <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
@@ -117,6 +118,11 @@ href="data:image/svg+xml,
       transition: background-color 0.3s ease, color 0.3s ease;
     }
     .container { max-width: 720px; margin: 0 auto; }
+    .theme-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
     .theme-toggle {
       background: transparent;
       border: 1px solid var(--border);
@@ -134,6 +140,41 @@ href="data:image/svg+xml,
     }
     .theme-toggle:hover { background: var(--primary); color: white; transform: scale(1.05); }
     .theme-toggle:active { transform: scale(0.95); }
+    .auto-theme-toggle {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.7rem;
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      transition: background 0.3s, transform 0.1s, box-shadow 0.3s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-width: 88px;
+    }
+    .auto-theme-toggle:hover { background: rgba(96, 165, 250, 0.1); transform: translateY(-1px); }
+    .auto-theme-toggle.active {
+      background: rgba(34, 197, 94, 0.18);
+      color: #22c55e;
+      border-color: #22c55e;
+      box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
+    }
+    .auto-theme-toggle.inactive {
+      background: rgba(239, 68, 68, 0.12);
+      color: #ef4444;
+      border-color: #ef4444;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+    }
+    [data-theme="light"] .auto-theme-toggle:hover {
+      background: rgba(96, 165, 250, 0.15);
+    }
     header {
       margin-bottom: 1.2rem;
       display: flex;
@@ -342,28 +383,51 @@ href="data:image/svg+xml,
     }
     .month-dropdown-wrapper {
       position: relative;
+      order: -1;
     }
     .month-dropdown-btn {
-      padding: 8px 12px;
-      background: var(--border);
+      padding: 8px 14px;
+      background: rgba(96, 165, 250, 0.1);
       border: 1px solid var(--primary);
       border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.95rem;
       color: var(--text);
       cursor: pointer;
-      font-size: 0.9rem;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 6px;
+      min-width: 40px;
+      justify-content: center;
       transition: all 0.2s ease;
     }
     .month-dropdown-btn:hover {
       background: var(--primary);
       color: white;
+      transform: translateY(-2px);
+    }
+    .month-dropdown-btn i {
+      font-size: 16px;
+      color: inherit;
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+    }
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
     .month-dropdown {
       position: absolute;
       top: 100%;
-      right: 0;
+      left: 0;
+      right: auto;
       background: var(--surface);
       border: 1px solid var(--primary);
       border-radius: 8px;
@@ -374,9 +438,14 @@ href="data:image/svg+xml,
       max-height: 300px;
       overflow-y: auto;
       display: none;
+      opacity: 0;
+      transform: translateY(-6px);
+      transition: opacity 0.15s ease, transform 0.15s ease;
     }
     .month-dropdown.show {
       display: block;
+      opacity: 1;
+      transform: translateY(0);
     }
     .month-dropdown-group {
       border-bottom: 1px solid var(--border);
@@ -401,7 +470,7 @@ href="data:image/svg+xml,
       font-size: 0.9rem;
     }
     .month-dropdown-item:hover {
-      background: rgba(96, 165, 250, 0.1);
+      background: linear-gradient(90deg, rgba(96, 165, 250, 0.2), rgba(96, 165, 250, 0.05));
       padding-left: 18px;
     }
     .month-dropdown-item.active {
@@ -439,7 +508,7 @@ href="data:image/svg+xml,
       font-variant-numeric: tabular-nums;
     }
     .transactions-list {
-      max-height: 150px;
+      max-height: 300px;
       overflow-y: auto;
       will-change: scroll-position;
     }
@@ -596,10 +665,12 @@ href="data:image/svg+xml,
       .row > div:first-child {
         grid-column: 1;
         grid-row: 1 / 3;
+        max-width: calc(100vw - 140px);
       }
       .row > div:nth-child(2) {
         grid-column: 1;
         grid-row: 2;
+        max-width: calc(100vw - 140px);
       }
       .actions { 
         grid-column: 2;
@@ -607,9 +678,23 @@ href="data:image/svg+xml,
         justify-content: flex-start;
         gap: 8px;
         flex-direction: column;
+        flex-shrink: 0;
       }
       .btn-small { width: 40px; height: 40px; font-size: 1rem; }
       .amt, .bgn { text-align: left; }
+      .desc { word-wrap: break-word; overflow-wrap: break-word; }
+      .month-tab-selector { gap: 10px; }
+      .month-dropdown-wrapper { max-width: 100%; }
+      .month-dropdown {
+        position: fixed;
+        top: auto;
+        left: 10px;
+        right: 10px;
+        bottom: auto;
+        width: auto;
+        max-width: none;
+        z-index: 1000;
+      }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
@@ -619,12 +704,18 @@ href="data:image/svg+xml,
 <body data-theme="dark">
 <div class="container">
   <header>
-    <h2>rootdeyan | myBalance &euro;</h2>
-    <button class="theme-toggle" id="theme-toggle" title="Toggle theme">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-      </svg>
-    </button>
+    <h2>myBalance &euro;</h2>
+    <div class="theme-controls">
+      <button class="auto-theme-toggle inactive" id="auto-theme-toggle" title="Auto theme" aria-label="Auto theme">
+        <span class="auto-label">AUTO:</span>
+        <span class="auto-state">OFF</span>
+      </button>
+      <button class="theme-toggle" id="theme-toggle" title="Toggle theme" aria-label="Toggle theme">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+    </div>
   </header>
   <div class="form" role="form" aria-label="Add transaction">
     <input id="desc" class="desc-field" placeholder="Description" aria-label="Transaction description" maxlength="100">
@@ -845,7 +936,7 @@ const UI = {
   
   renderSummary() {
     const ck = STATE.selectedMonth || Formatter.getMonthKey();
-    const currentMonth = STATE.months[ck];
+    const currentMonth = DataManager.getOrCreateMonth(ck);
     
     if (!currentMonth) {
       document.getElementById('summary').innerHTML = '';
@@ -894,6 +985,7 @@ const UI = {
     c.innerHTML = '';
     const keys = Object.keys(STATE.months).sort().reverse();
     const ck = Formatter.getMonthKey();
+    const displayKey = STATE.selectedMonth || ck;
     
     if (!keys.includes(ck)) {
       DataManager.getOrCreateMonth(ck);
@@ -909,13 +1001,6 @@ const UI = {
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const currentMonthName = monthNames[parseInt(curMonth) - 1];
     
-    // Current month tab
-    const currentTab = document.createElement('div');
-    currentTab.className = 'month-tab active';
-    currentTab.textContent = `${currentMonthName} ${curYear}`;
-    currentTab.onclick = () => UI.switchMonth(ck);
-    selector.appendChild(currentTab);
-    
     // Group months by year
     const monthsByYear = {};
     keys.forEach(key => {
@@ -926,14 +1011,19 @@ const UI = {
       }
     });
     
-    // Dropdown for past months
+    // Dropdown for past months (FIRST TAB)
     if (Object.keys(monthsByYear).length > 0) {
       const dropdownWrapper = document.createElement('div');
       dropdownWrapper.className = 'month-dropdown-wrapper';
       
       const dropdownBtn = document.createElement('button');
       dropdownBtn.className = 'month-dropdown-btn';
-      dropdownBtn.textContent = '📅 Previous Months';
+      dropdownBtn.title = 'Previous Months';
+      dropdownBtn.setAttribute('aria-label', 'Previous Months');
+      dropdownBtn.innerHTML = `
+        <i class="fa-regular fa-calendar-check"></i>
+        <span class="sr-only">Previous Months</span>
+      `;
       
       const dropdown = document.createElement('div');
       dropdown.className = 'month-dropdown';
@@ -954,7 +1044,10 @@ const UI = {
           item.className = 'month-dropdown-item';
           const [y, m] = monthKey.split('-');
           const mName = monthNames[parseInt(m) - 1];
-          item.textContent = mName;
+          item.textContent = `${mName} ${y}`;
+          if (monthKey === displayKey) {
+            item.classList.add('active');
+          }
           item.onclick = () => {
             UI.switchMonth(monthKey);
             dropdown.classList.remove('show');
@@ -967,6 +1060,21 @@ const UI = {
       
       dropdownBtn.onclick = (e) => {
         e.stopPropagation();
+        const rect = dropdownBtn.getBoundingClientRect();
+        const isMobile = window.matchMedia('(max-width: 560px)').matches;
+        if (isMobile) {
+          dropdown.style.position = 'fixed';
+          dropdown.style.left = '10px';
+          dropdown.style.right = '10px';
+          dropdown.style.top = `${Math.min(rect.bottom + 8, window.innerHeight - 20)}px`;
+          dropdown.style.width = 'calc(100% - 20px)';
+        } else {
+          dropdown.style.position = 'absolute';
+          dropdown.style.left = '0';
+          dropdown.style.right = 'auto';
+          dropdown.style.top = '100%';
+          dropdown.style.width = 'auto';
+        }
         dropdown.classList.toggle('show');
       };
       
@@ -977,32 +1085,39 @@ const UI = {
       selector.appendChild(dropdownWrapper);
     }
     
+    // Current month tab (SECOND TAB)
+    const currentTab = document.createElement('div');
+    currentTab.className = displayKey === ck ? 'month-tab active' : 'month-tab';
+    currentTab.textContent = `${currentMonthName} ${curYear}`;
+    currentTab.onclick = () => UI.switchMonth(ck);
+    selector.appendChild(currentTab);
+    
     c.appendChild(selector);
     
-    // Render current month data
-    const ckData = STATE.months[ck];
-    if (ckData) {
+    // Render selected month data (entire list)
+    const monthData = STATE.months[displayKey];
+    if (monthData) {
       const monthContainer = document.createElement('div');
       monthContainer.className = 'month';
       
       const l = document.createElement('div');
       l.className = 'transactions-list';
       
-      if (ckData.carry !== 0) {
+      if (monthData.carry !== 0) {
         const cr = document.createElement('div');
         cr.className = 'row';
         cr.innerHTML = `<div class="desc" style="color:var(--text2)">Carry from prev</div>
-          <div><div class="amt">${ckData.carry >= 0 ? '+' : ''}${ckData.carry.toFixed(2)} €</div></div><div></div>`;
+          <div><div class="amt">${monthData.carry >= 0 ? '+' : ''}${monthData.carry.toFixed(2)} €</div></div><div></div>`;
         l.appendChild(cr);
       }
       
-      if (ckData.tx.length === 0 && ckData.carry === 0) {
+      if (monthData.tx.length === 0 && monthData.carry === 0) {
         const e = document.createElement('div');
         e.className = 'empty-month';
         e.textContent = 'No transactions this month';
         l.appendChild(e);
       } else {
-        ckData.tx.forEach((t, i) => {
+        monthData.tx.forEach((t, i) => {
           const r = document.createElement('div');
           r.className = 'row';
           const dateStr = Formatter.formatDate(t.ts);
@@ -1017,13 +1132,13 @@ const UI = {
               <div class="bgn">≈ ${bgnAmt} BGN</div>
             </div>
             <div class="actions">
-              <button class="btn-small btn-edit" onclick="UI.startEdit('${ck}',${i})" title="Edit">
+              <button class="btn-small btn-edit" onclick="UI.startEdit('${displayKey}',${i})" title="Edit">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                   <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                 </svg>
               </button>
-              <button class="btn-small btn-delete" onclick="UI.removeTx('${ck}',${i})" title="Delete">
+              <button class="btn-small btn-delete" onclick="UI.removeTx('${displayKey}',${i})" title="Delete">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <polyline points="3 6 5 6 21 6"></polyline>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -1109,20 +1224,69 @@ const UI = {
 // Theme Management
 const Theme = {
   init() {
-    const currentTheme = localStorage.getItem(CONFIG.THEME_KEY) || 'dark';
-    document.body.setAttribute('data-theme', currentTheme);
-    this.updateToggleIcon(currentTheme);
+    this.systemMedia = window.matchMedia('(prefers-color-scheme: dark)');
+    const setting = localStorage.getItem(CONFIG.THEME_KEY) || 'dark';
+    if (setting === 'auto') {
+      this.applyTheme(this.getSystemTheme());
+    } else {
+      this.applyTheme(setting);
+    }
+    this.updateAutoButton(setting === 'auto');
+    
+    this.systemMedia.addEventListener('change', (e) => {
+      if (localStorage.getItem(CONFIG.THEME_KEY) === 'auto') {
+        this.applyTheme(e.matches ? 'dark' : 'light');
+      }
+    });
     
     document.getElementById('theme-toggle').addEventListener('click', () => this.toggle());
+    const autoBtn = document.getElementById('auto-theme-toggle');
+    if (autoBtn) autoBtn.addEventListener('click', () => this.toggleAuto());
     document.getElementById('type').addEventListener('change', (e) => UI.updateTypeSelect(e.target.value));
   },
   
+  getSystemTheme() {
+    return this.systemMedia && this.systemMedia.matches ? 'dark' : 'light';
+  },
+  
+  applyTheme(theme) {
+    document.body.setAttribute('data-theme', theme);
+    this.updateToggleIcon(theme);
+  },
+  
   toggle() {
+    const setting = localStorage.getItem(CONFIG.THEME_KEY) || 'dark';
     const current = document.body.getAttribute('data-theme');
     const newTheme = current === 'dark' ? 'light' : 'dark';
-    document.body.setAttribute('data-theme', newTheme);
     localStorage.setItem(CONFIG.THEME_KEY, newTheme);
-    this.updateToggleIcon(newTheme);
+    this.updateAutoButton(false);
+    this.applyTheme(newTheme);
+    if (setting === 'auto') {
+      this.updateAutoButton(false);
+    }
+  },
+  
+  toggleAuto() {
+    const setting = localStorage.getItem(CONFIG.THEME_KEY);
+    if (setting === 'auto') {
+      const current = document.body.getAttribute('data-theme') || this.getSystemTheme();
+      localStorage.setItem(CONFIG.THEME_KEY, current);
+      this.updateAutoButton(false);
+      this.applyTheme(current);
+    } else {
+      localStorage.setItem(CONFIG.THEME_KEY, 'auto');
+      this.updateAutoButton(true);
+      this.applyTheme(this.getSystemTheme());
+    }
+  },
+  
+  updateAutoButton(isAuto) {
+    const btn = document.getElementById('auto-theme-toggle');
+    if (!btn) return;
+    btn.classList.toggle('active', isAuto);
+    btn.classList.toggle('inactive', !isAuto);
+    const state = btn.querySelector('.auto-state');
+    if (state) state.textContent = isAuto ? 'ON' : 'OFF';
   },
   
   updateToggleIcon(theme) {
@@ -1157,7 +1321,7 @@ const FileManager = {
     try {
       const data = STATE.months;
       let txtContent = 'SALARY TRACKER BACKUP - ' + new Date().toLocaleString() + '\n';
-      txtContent += '=' .repeat(50) + '\n\n';
+      txtContent += '='.repeat(50) + '\n\n';
       
       const keys = Object.keys(data).sort();
       keys.forEach(monthKey => {
@@ -1166,7 +1330,7 @@ const FileManager = {
         const bgnTotal = Formatter.convertToBGN(final);
         
         txtContent += `MONTH: ${monthKey}\n`;
-        txtContent += '-' .repeat(40) + '\n';
+        txtContent += '-'.repeat(40) + '\n';
         txtContent += `Carry from previous: ${m.carry.toFixed(2)} €\n`;
         txtContent += `Total Income: ${m.income.toFixed(2)} €\n`;
         txtContent += `Total Expense: ${m.expense.toFixed(2)} €\n`;
@@ -1395,6 +1559,7 @@ setInterval(() => {
     UI.render();
   }
 }, 60000);
+
 </script>
 </body>
 </html>
