@@ -140,6 +140,7 @@ href="data:image/svg+xml,
     }
     .theme-toggle:hover { background: var(--primary); color: white; transform: scale(1.05); }
     .theme-toggle:active { transform: scale(0.95); }
+    .tour-toggle i { font-size: 14px; }
     .auto-theme-toggle {
       background: transparent;
       border: 1px solid var(--border);
@@ -624,6 +625,66 @@ href="data:image/svg+xml,
     .summary-item.income-summary .summary-value { color: var(--income); }
     .summary-item.expense-summary .summary-value { color: var(--expense); }
     .summary-item.balance-summary .summary-value { color: var(--primary); }
+    .tour-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .tour-overlay.active { display: flex; }
+    .tour-tooltip {
+      position: fixed;
+      max-width: min(280px, 90vw);
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+      z-index: 2001;
+      font-size: 0.9rem;
+    }
+    .tour-tooltip h4 {
+      margin: 0 0 6px 0;
+      font-size: 0.95rem;
+    }
+    .tour-tooltip p { margin: 0 0 10px 0; color: var(--text2); }
+    .tour-actions {
+      display: flex;
+      gap: 6px;
+      justify-content: flex-end;
+      align-items: center;
+    }
+    .tour-btn {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      line-height: 1;
+      min-width: 56px;
+      text-align: center;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .tour-btn.secondary {
+      background: transparent;
+      color: var(--text2);
+      border: 1px solid var(--border);
+    }
+    .tour-highlight {
+      position: relative;
+      z-index: 2002;
+      box-shadow: 0 0 0 3px rgba(96,165,250,0.6);
+      border-radius: 8px;
+    }
     @media (max-width: 560px) {
       .summary-panel { 
         grid-template-columns: 1fr; 
@@ -710,6 +771,9 @@ href="data:image/svg+xml,
         <span class="auto-label">AUTO:</span>
         <span class="auto-state">OFF</span>
       </button>
+      <button class="theme-toggle tour-toggle" id="tour-toggle" title="Show guide" aria-label="Show guide">
+        <i class="fa-solid fa-circle-question" aria-hidden="true"></i>
+      </button>
       <button class="theme-toggle" id="theme-toggle" title="Toggle theme" aria-label="Toggle theme">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
@@ -747,6 +811,17 @@ href="data:image/svg+xml,
   <div id="summary" role="region" aria-label="Current month summary"></div>
   <div id="months" role="region" aria-label="Transactions by month"></div>
   <div id="indicator" class="indicator" role="status" aria-live="polite"></div>
+</div>
+<div id="tour-overlay" class="tour-overlay" aria-hidden="true">
+  <div id="tour-tooltip" class="tour-tooltip" role="dialog" aria-live="polite">
+    <h4 id="tour-title">Welcome</h4>
+    <p id="tour-text">Quick tips to get started.</p>
+    <div class="tour-actions">
+      <button id="tour-skip" class="tour-btn secondary" type="button">Skip</button>
+      <button id="tour-prev" class="tour-btn secondary" type="button">Back</button>
+      <button id="tour-next" class="tour-btn" type="button">Next</button>
+    </div>
+  </div>
 </div>
 <script>
 // Configuration & Constants
@@ -1546,6 +1621,97 @@ document.addEventListener('keydown', (e) => {
 Theme.init();
 UI.updateTypeSelect('income'); // Apply default Income styling
 UI.render();
+
+// Guided tour (first visit)
+const Tour = {
+  key: 'salary-tracker-tour-v1',
+  stepIndex: 0,
+  steps: [
+    { selector: '.form', title: 'Add transaction', text: 'Enter description, amount, choose type and press Add.' },
+    { selector: '#summary', title: 'Summary', text: 'Monthly Income, Spent and Balance with EUR and BGN.' },
+    { selector: '.month-tab-selector', title: 'Months', text: 'Use Previous Months icon or current month tab to switch.' },
+    { selector: '.menu-container', title: 'Backups', text: 'Download to export or Upload to import and merge/replace.' },
+    { selector: '.theme-controls', title: 'Theme', text: 'Toggle light/dark or enable AUTO to follow system.' }
+  ],
+  start(force = false) {
+    if (!force && localStorage.getItem(this.key) === 'done') return;
+    this.stepIndex = 0;
+    this.overlay = document.getElementById('tour-overlay');
+    this.tooltip = document.getElementById('tour-tooltip');
+    this.titleEl = document.getElementById('tour-title');
+    this.textEl = document.getElementById('tour-text');
+    this.btnPrev = document.getElementById('tour-prev');
+    this.btnNext = document.getElementById('tour-next');
+    this.btnSkip = document.getElementById('tour-skip');
+    if (!this.overlay || !this.tooltip) return;
+    this.clearHighlight();
+    this.overlay.classList.add('active');
+    this.overlay.setAttribute('aria-hidden', 'false');
+    this.bind();
+    this.showStep(0);
+  },
+  bind() {
+    this.btnPrev.onclick = () => this.showStep(this.stepIndex - 1);
+    this.btnNext.onclick = () => this.showStep(this.stepIndex + 1);
+    this.btnSkip.onclick = () => this.finish();
+    window.addEventListener('resize', () => this.positionTooltip());
+    window.addEventListener('scroll', () => this.positionTooltip(), true);
+  },
+  showStep(i) {
+    if (i < 0) return;
+    if (i >= this.steps.length) return this.finish();
+    this.clearHighlight();
+    this.stepIndex = i;
+    const step = this.steps[i];
+    const target = document.querySelector(step.selector);
+    if (!target) return this.finish();
+    this.titleEl.textContent = step.title;
+    this.textEl.textContent = step.text;
+    this.btnPrev.style.display = i === 0 ? 'none' : 'inline-flex';
+    this.btnNext.textContent = i === this.steps.length - 1 ? 'Done' : 'Next';
+    target.classList.add('tour-highlight');
+    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    requestAnimationFrame(() => this.positionTooltip(target));
+  },
+  positionTooltip(target) {
+    const el = target || document.querySelector(this.steps[this.stepIndex]?.selector);
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const tt = this.tooltip.getBoundingClientRect();
+    const padding = 12;
+    let top = rect.bottom + padding;
+    let left = rect.left;
+    const isSmall = window.innerWidth <= 600;
+    if (top + tt.height > window.innerHeight) top = rect.top - tt.height - padding;
+    if (top < padding) top = window.innerHeight - tt.height - padding;
+    if (isSmall) left = (window.innerWidth - tt.width) / 2;
+    if (left + tt.width > window.innerWidth) left = window.innerWidth - tt.width - padding;
+    if (left < padding) left = padding;
+    this.tooltip.style.top = `${top}px`;
+    this.tooltip.style.left = `${left}px`;
+  },
+  clearHighlight() {
+    document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
+  },
+  finish() {
+    localStorage.setItem(this.key, 'done');
+    this.clearHighlight();
+    if (this.overlay) {
+      this.overlay.classList.remove('active');
+      this.overlay.setAttribute('aria-hidden', 'true');
+    }
+  }
+};
+
+const tourToggleBtn = document.getElementById('tour-toggle');
+if (tourToggleBtn) {
+  tourToggleBtn.addEventListener('click', () => {
+    localStorage.removeItem(Tour.key);
+    Tour.start(true);
+  });
+}
+
+setTimeout(() => Tour.start(), 400);
 
 // Service Worker for offline support (optional)
 if ('serviceWorker' in navigator) {
