@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="description" content="Free personal salary tracker app. Manage monthly income, expenses, balances in EUR/BGN with secure client-side storage. No signup required.">
-  <title>rootdeyan | myBalance €</title>
+  <title>RTDN | myBalance €</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -42,10 +42,10 @@
       --carry-dim:    rgba(255,179,64,0.12);
       --carry-rgb:    255,179,64;
 
-      --radius-sm:    10px;
-      --radius:       16px;
-      --radius-lg:    22px;
-      --radius-xl:    28px;
+      --radius-sm:    7px;
+      --radius:       10px;
+      --radius-lg:    12px;
+      --radius-xl:    14px;
 
       --shadow-sm: 0 2px 12px rgba(0,0,0,0.35);
       --shadow:    0 6px 30px rgba(0,0,0,0.5);
@@ -171,7 +171,7 @@
     .icon-btn {
       width: 36px;
       height: 36px;
-      border-radius: 12px;
+      border-radius: 8px;
       border: 1px solid var(--border);
       background: var(--surface);
       color: var(--text2);
@@ -519,7 +519,7 @@
 
     .month-pill {
       padding: 8px 16px;
-      border-radius: 99px;
+      border-radius: 8px;
       border: 1px solid var(--border);
       background: var(--surface);
       color: var(--text2);
@@ -538,7 +538,7 @@
 
     .prev-months-btn {
       padding: 8px 14px;
-      border-radius: 99px;
+      border-radius: 8px;
       border: 1px solid var(--border);
       background: var(--surface);
       color: var(--text2);
@@ -751,7 +751,7 @@
       border: 1px solid var(--border-hi);
       color: var(--text);
       padding: 10px 20px;
-      border-radius: 99px;
+      border-radius: 10px;
       font-size: 0.82rem;
       font-weight: 500;
       z-index: 2000;
@@ -871,7 +871,7 @@
   <!-- HEADER -->
   <header>
     <div class="header-brand">
-      <h2>rootdeyan | myBalance €</h2>
+      <h2>RTDN | myBalance €</h2>
       <div class="live-date" id="live-date"></div>
     </div>
     <div class="header-actions">
@@ -1007,10 +1007,13 @@ const Formatter = {
   },
   formatDate(timestamp) {
     try {
-      return new Date(timestamp).toLocaleString('bg-BG', {
-        day: '2-digit', month: '2-digit', year: 'numeric',
-        hour: '2-digit', minute: '2-digit', hour12: false
-      }).replace(',', '');
+      const d = new Date(timestamp);
+      const dd  = String(d.getDate()).padStart(2, '0');
+      const mm  = String(d.getMonth() + 1).padStart(2, '0');
+      const yy  = String(d.getFullYear()).slice(-2);
+      const hh  = String(d.getHours()).padStart(2, '0');
+      const min = String(d.getMinutes()).padStart(2, '0');
+      return `${dd}.${mm}.${yy} | ${hh}:${min}`;
     } catch { return 'Invalid Date'; }
   },
   convertToBGN(eur) {
@@ -1143,12 +1146,6 @@ const UI = {
     const expense = cm.expense;
     const balance = carry + income - expense;
 
-    const available = carry + income;
-    const spendPct  = available > 0 ? Math.min((expense / available) * 100, 100) : 0;
-    const ringDash  = spendPct.toFixed(1);
-    const barColor  = spendPct < 50 ? 'var(--income)' : spendPct < 80 ? 'var(--carry)' : 'var(--expense)';
-    const ringStroke = spendPct < 50 ? '#00d68f' : spendPct < 80 ? '#ffb340' : '#ff5e7e';
-
     const balCls = balance < 0 ? 'balance-neg' : 'balance-card';
 
     const carryHTML = carry !== 0 ? `
@@ -1178,37 +1175,7 @@ const UI = {
           <div class="stat-eur">${balance >= 0 ? '+' : ''}${balance.toFixed(2)} €</div>
           <div class="stat-bgn">≈ ${Formatter.convertToBGN(Math.abs(balance))} BGN</div>
         </div>
-        <div class="spend-row">
-          <div class="ring-wrap">
-            <svg class="ring-svg" viewBox="0 0 36 36">
-              <path class="ring-track"
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-              <path class="ring-fill" id="ring-fill" stroke="${ringStroke}"
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-            </svg>
-            <div class="ring-label" id="ring-label">0%</div>
-          </div>
-          <div class="spend-info">
-            <div class="spend-title">Spending Overview</div>
-            <div class="bar-track">
-              <div class="bar-fill" id="bar-fill" style="width:0%;background:${barColor}"></div>
-            </div>
-            <div class="spend-stats">
-              <span>${spendPct.toFixed(0)}% of available</span>
-              <span>${expense.toFixed(2)} / ${available.toFixed(2)} €</span>
-            </div>
-          </div>
-        </div>
       </div>`;
-
-    requestAnimationFrame(() => {
-      const bf = document.getElementById('bar-fill');
-      const rf = document.getElementById('ring-fill');
-      const rl = document.getElementById('ring-label');
-      if (bf) bf.style.width = spendPct + '%';
-      if (rf) rf.setAttribute('stroke-dasharray', `${ringDash},100`);
-      if (rl) rl.textContent = spendPct.toFixed(0) + '%';
-    });
   },
 
   renderMonths() {
@@ -1507,7 +1474,7 @@ const FileManager = {
       const blob = new Blob([txt], { type: 'text/plain;charset=utf-8' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = `ST-${Formatter.filenameDateStamp()}.txt`;
+      link.download = `myBalance - ${Formatter.filenameDateStamp()}.txt`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
