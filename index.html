@@ -2,967 +2,651 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="Free personal salary tracker app. Manage monthly income, expenses, balances in EUR/BGN with secure client-side storage. No signup required.">
+  <meta name="theme-color" content="#080c14" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f0f3fa" media="(prefers-color-scheme: light)">
   <title>RTDN | myBalance €</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M70 20 Q40 20 30 50 Q40 80 70 80' fill='none' stroke='white' stroke-width='12' stroke-linecap='round'/><line x1='28' y1='40' x2='68' y2='40' stroke='white' stroke-width='12' stroke-linecap='round'/><line x1='28' y1='60' x2='68' y2='60' stroke='white' stroke-width='12' stroke-linecap='round'/></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%236c63ff'/><path d='M70 20 Q40 20 30 50 Q40 80 70 80' fill='none' stroke='white' stroke-width='12' stroke-linecap='round'/><line x1='28' y1='40' x2='68' y2='40' stroke='white' stroke-width='12' stroke-linecap='round'/><line x1='28' y1='60' x2='68' y2='60' stroke='white' stroke-width='12' stroke-linecap='round'/></svg>">
   <style>
-    /* ══════════════════════════════════════════
-       TOKENS
-    ══════════════════════════════════════════ */
+    /* ══════════ TOKENS ══════════ */
     :root {
       --bg:           #080c14;
       --surface:      #0e1420;
-      --card:         #111825;
-      --card-hover:   #141d2e;
-      --glass:        rgba(14,20,32,0.72);
-      --border:       rgba(255,255,255,0.07);
-      --border-hi:    rgba(255,255,255,0.13);
+      --card:         #131b2a;
+      --card-hover:   #172034;
+      --border:       rgba(255,255,255,0.08);
+      --border-hi:    rgba(255,255,255,0.16);
       --text:         #e8edf5;
-      --text2:        #6b7a94;
-      --text3:        #9aaabb;
+      --text2:        #8a97ae;   /* raised from #6b7a94 for 4.5:1 contrast */
+      --text3:        #aab6c8;
 
-      --primary:      #6c63ff;
-      --primary-dim:  rgba(108,99,255,0.18);
-      --primary-glow: rgba(108,99,255,0.35);
+      --primary:      #7c74ff;
+      --primary-dim:  rgba(124,116,255,0.16);
+      --primary-glow: rgba(124,116,255,0.35);
+      --on-primary:   #ffffff;
 
       --income:       #00d68f;
       --income-dim:   rgba(0,214,143,0.12);
       --income-glow:  rgba(0,214,143,0.3);
-
-      --expense:      #ff5e7e;
-      --expense-dim:  rgba(255,94,126,0.12);
-      --expense-glow: rgba(255,94,126,0.3);
-
+      --expense:      #ff6b88;
+      --expense-dim:  rgba(255,107,136,0.12);
+      --expense-glow: rgba(255,107,136,0.3);
       --carry:        #ffb340;
-      --carry-dim:    rgba(255,179,64,0.12);
       --carry-rgb:    255,179,64;
 
-      --radius-sm:    7px;
-      --radius:       10px;
-      --radius-lg:    12px;
-      --radius-xl:    14px;
+      --radius-sm: 10px;
+      --radius:    12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
 
       --shadow-sm: 0 2px 12px rgba(0,0,0,0.35);
-      --shadow:    0 6px 30px rgba(0,0,0,0.5);
-      --shadow-lg: 0 16px 60px rgba(0,0,0,0.65);
+      --shadow:    0 8px 30px rgba(0,0,0,0.45);
+      --shadow-lg: 0 18px 60px rgba(0,0,0,0.6);
+
+      --tap: 44px;
+      --gutter: 16px;
     }
 
     [data-theme="light"] {
       --bg:          #f0f3fa;
       --surface:     #ffffff;
-      --card:        #f7f9fd;
+      --card:        #f5f7fc;
       --card-hover:  #eef2fb;
-      --glass:       rgba(255,255,255,0.82);
-      --border:      rgba(0,0,0,0.07);
-      --border-hi:   rgba(0,0,0,0.12);
+      --border:      rgba(15,23,42,0.08);
+      --border-hi:   rgba(15,23,42,0.16);
       --text:        #0d1626;
-      --text2:       #8494ac;
-      --text3:       #5a6a82;
+      --text2:       #5b6880;   /* raised from #8494ac for contrast */
+      --text3:       #3f4b60;
       --primary:     #5046e4;
       --primary-dim: rgba(80,70,228,0.1);
       --primary-glow:rgba(80,70,228,0.2);
-      --income:      #00b87a;
-      --income-dim:  rgba(0,184,122,0.1);
-      --expense:     #e8294d;
-      --expense-dim: rgba(232,41,77,0.1);
-      --carry:       #e09000;
-      --carry-dim:   rgba(224,144,0,0.1);
-      --carry-rgb:   224,144,0;
-      --shadow-sm:   0 2px 12px rgba(0,0,0,0.08);
-      --shadow:      0 6px 30px rgba(0,0,0,0.12);
-      --shadow-lg:   0 16px 60px rgba(0,0,0,0.15);
+      --income:      #00875a;
+      --income-dim:  rgba(0,135,90,0.1);
+      --income-glow: rgba(0,135,90,0.2);
+      --expense:     #d6203f;
+      --expense-dim: rgba(214,32,63,0.08);
+      --expense-glow:rgba(214,32,63,0.2);
+      --carry:       #b36b00;
+      --carry-rgb:   179,107,0;
+      --shadow-sm:   0 1px 3px rgba(15,23,42,0.06), 0 2px 12px rgba(15,23,42,0.05);
+      --shadow:      0 6px 30px rgba(15,23,42,0.08);
+      --shadow-lg:   0 16px 60px rgba(15,23,42,0.16);
     }
 
-    /* ══════════════════════════════════════════
-       RESET & BASE
-    ══════════════════════════════════════════ */
+    /* ══════════ BASE ══════════ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { height: 100%; -webkit-text-size-adjust: 100%; }
 
-    /* ── CHANGE 1: html gets height:100% so body/container can fill viewport ── */
-    html {
-      height: 100%;
-      scroll-behavior: smooth;
-      -webkit-text-size-adjust: 100%;
-    }
-
-    /* ── CHANGE 1 cont.: body is now a fixed-size scroll host — background stays put ── */
     body {
-      font-family: 'Roboto', sans-serif;
-      font-weight: 400;
+      font-family: 'Roboto', system-ui, -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text);
       height: 100vh;
-      height: 100dvh;       /* dynamic viewport height — correct on mobile browsers */
-      overflow: hidden;     /* body itself never scrolls → background is truly fixed */
-      transition: background 0.35s ease, color 0.35s ease;
+      height: 100dvh;
+      overflow: hidden;      /* the container scrolls, so the background stays fixed */
+      transition: background 0.3s ease, color 0.3s ease;
       -webkit-font-smoothing: antialiased;
+      font-variant-numeric: tabular-nums;
     }
-
-    /* Subtle animated mesh background */
     body::before {
       content: '';
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
       background:
-        radial-gradient(ellipse 60% 40% at 20% 10%, rgba(108,99,255,0.07) 0%, transparent 65%),
-        radial-gradient(ellipse 50% 35% at 80% 80%, rgba(0,214,143,0.05) 0%, transparent 65%),
-        radial-gradient(ellipse 40% 30% at 60% 30%, rgba(255,94,126,0.04) 0%, transparent 60%);
+        radial-gradient(ellipse 60% 40% at 15% 5%,  rgba(124,116,255,0.09) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 35% at 85% 85%, rgba(0,214,143,0.06) 0%, transparent 65%),
+        radial-gradient(ellipse 40% 30% at 65% 30%, rgba(255,107,136,0.04) 0%, transparent 60%);
     }
-    [data-theme="light"] body::before {
+    body[data-theme="light"]::before {
       background:
-        radial-gradient(ellipse 60% 40% at 20% 10%, rgba(80,70,228,0.06) 0%, transparent 65%),
-        radial-gradient(ellipse 50% 35% at 80% 80%, rgba(0,184,122,0.05) 0%, transparent 65%),
-        radial-gradient(ellipse 40% 30% at 60% 30%, rgba(232,41,77,0.04) 0%, transparent 60%);
+        radial-gradient(ellipse 60% 40% at 15% 5%,  rgba(80,70,228,0.07) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 35% at 85% 85%, rgba(0,135,90,0.05) 0%, transparent 65%);
     }
 
-    /* ── CHANGE 1 cont.: container is now the scroll area ── */
+    button { font: inherit; color: inherit; }
+    :focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+    .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+
     .container {
-      position: relative;
-      z-index: 1;
-      max-width: 440px;
-      margin: 0 auto;
-      padding: 16px 14px 40px;
-      /* scroll the content, not the body */
+      position: relative; z-index: 1;
       height: 100%;
-      overflow-y: auto;
-      overflow-x: hidden;
-      -webkit-overflow-scrolling: touch; /* momentum scrolling on iOS */
-      scroll-behavior: smooth;
+      overflow-y: auto; overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      padding:
+        calc(12px + env(safe-area-inset-top))
+        calc(var(--gutter) + env(safe-area-inset-right))
+        calc(40px + env(safe-area-inset-bottom))
+        calc(var(--gutter) + env(safe-area-inset-left));
     }
+    .shell { max-width: 560px; margin: 0 auto; }
 
-    /* ══════════════════════════════════════════
-       HEADER
-    ══════════════════════════════════════════ */
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 22px;
-      padding-top: 6px;
+    /* ══════════ HEADER ══════════ */
+    .app-header {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 12px; margin-bottom: 18px; padding-top: 4px;
     }
-
-    .header-brand h2 {
-      font-size: 1.35rem;
-      font-weight: 700;
-      letter-spacing: -0.3px;
+    .header-brand { min-width: 0; }
+    .header-brand h1 {
+      font-size: clamp(1.15rem, 4.5vw, 1.5rem);
+      font-weight: 700; letter-spacing: -0.3px; line-height: 1.2;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       background: linear-gradient(135deg, #a5b4fc 0%, #c4b5fd 60%, #f0abfc 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      line-height: 1.2;
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
     }
-    [data-theme="light"] .header-brand h2 {
-      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
+    [data-theme="light"] .header-brand h1 { background-image: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
     .live-date {
-      font-family: 'Roboto Mono', monospace;
-      font-size: 0.62rem;
-      font-weight: 400;
-      color: var(--text2);
-      margin-top: 4px;
-      letter-spacing: 0.3px;
+      font-family: 'Roboto Mono', monospace; font-size: 0.75rem;
+      color: var(--text2); margin-top: 4px; letter-spacing: 0.2px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-
-    .header-actions {
-      display: flex;
-      gap: 7px;
-      align-items: center;
-      padding-top: 2px;
-    }
+    .header-actions { display: flex; gap: 8px; flex-shrink: 0; }
 
     .icon-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
+      width: var(--tap); height: var(--tap);
+      border-radius: var(--radius-sm);
       border: 1px solid var(--border);
       background: var(--surface);
       color: var(--text2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: grid; place-items: center;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: background .2s, border-color .2s, color .2s, transform .1s;
       -webkit-tap-highlight-color: transparent;
-      flex-shrink: 0;
     }
-    .icon-btn:hover  { background: var(--primary); border-color: var(--primary); color: #fff; }
-    .icon-btn:active { transform: scale(0.9); }
-    .icon-btn.auto-active {
-      background: var(--primary-dim);
-      border-color: var(--primary);
-      color: var(--primary);
+    .icon-btn:active { transform: scale(0.94); }
+    .icon-btn.auto-active { background: var(--primary-dim); border-color: var(--primary); color: var(--primary); }
+
+    /* ══════════ LAYOUT ══════════ */
+    .layout { display: flex; flex-direction: column; gap: 18px; }
+    .side   { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+    .main   { min-width: 0; }
+
+    .section-title {
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 1px;
+      text-transform: uppercase; color: var(--text2);
     }
 
-    /* ══════════════════════════════════════════
-       INPUT FORM
-    ══════════════════════════════════════════ */
+    /* ══════════ FORM ══════════ */
     .form-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius-xl);
       padding: 16px;
-      margin-bottom: 18px;
       box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+      display: flex; flex-direction: column; gap: 12px;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .form-card.editing { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-dim), var(--shadow); }
+    .form-head { display: flex; align-items: center; justify-content: space-between; min-height: 20px; }
+    .edit-badge {
+      font-size: 0.75rem; font-weight: 700; color: var(--primary);
+      background: var(--primary-dim); padding: 3px 10px; border-radius: 99px;
     }
 
-    .form-row { display: flex; gap: 8px; }
+    .form-grid { display: flex; flex-direction: column; gap: 12px; }
+    .field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+    .field label { font-size: 0.8rem; font-weight: 500; color: var(--text3); }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: end; }
 
-    input, select {
-      font-family: 'Roboto', sans-serif;
-      font-size: 0.92rem;
-      font-weight: 400;
-      color: var(--text);
+    input {
+      font-family: inherit; font-size: 1rem; color: var(--text);
       background: var(--card);
-      border: 1px solid var(--border);
+      border: 1px solid var(--border-hi);
       border-radius: var(--radius-sm);
-      padding: 12px 14px;
-      min-height: 46px;
+      padding: 0 14px; height: 48px; width: 100%;
       outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      -webkit-tap-highlight-color: transparent;
+      transition: border-color .2s, box-shadow .2s;
     }
-    input::placeholder { color: var(--text2); }
-    input:focus, select:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px var(--primary-dim);
-    }
-    input[type=number] {
-      appearance: textfield;
-      -moz-appearance: textfield;
-    }
+    input::placeholder { color: var(--text2); opacity: 0.8; }
+    input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-dim); }
+    input[type=number] { appearance: textfield; -moz-appearance: textfield; font-family: 'Roboto Mono', monospace; }
     input[type=number]::-webkit-outer-spin-button,
     input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 
-    #desc { width: 100%; }
-
-    #amount { flex: 1; min-width: 0; }
-
-    /* Type select — styled pill */
-    #type {
-      flex: 0 0 120px;
-      appearance: none;
-      -webkit-appearance: none;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 0.82rem;
-      padding: 12px 32px 12px 14px;
-      background-repeat: no-repeat;
-      background-position: right 10px center;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%236c63ff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-      transition: all 0.25s ease;
-    }
-    #type.income-select  { border-color: var(--income);  color: var(--income);  background-color: var(--income-dim);  }
-    #type.expense-select { border-color: var(--expense); color: var(--expense); background-color: var(--expense-dim); }
-    #type:focus { box-shadow: 0 0 0 3px var(--primary-dim); }
-    select option { background: var(--surface); color: var(--text); }
-
-    /* Primary CTA */
-    .btn-primary {
-      width: 100%;
-      min-height: 50px;
+    /* Income / Expense segmented control */
+    .seg {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
+      height: 48px; padding: 4px;
+      background: var(--card); border: 1px solid var(--border-hi);
       border-radius: var(--radius-sm);
-      border: none;
-      background: linear-gradient(135deg, #6c63ff 0%, #9b6cfe 100%);
-      color: #fff;
-      font-family: 'Roboto', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 18px rgba(108,99,255,0.4);
-      -webkit-tap-highlight-color: transparent;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
     }
-    .btn-primary:hover  { opacity: 0.92; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(108,99,255,0.5); }
+    .seg-btn {
+      border: none; border-radius: 7px; background: transparent;
+      color: var(--text2); font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+      transition: background .2s, color .2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .seg-btn[aria-checked="true"][data-type="income"]  { background: var(--income-dim);  color: var(--income);  box-shadow: inset 0 0 0 1px var(--income); }
+    .seg-btn[aria-checked="true"][data-type="expense"] { background: var(--expense-dim); color: var(--expense); box-shadow: inset 0 0 0 1px var(--expense); }
+
+    .btn-row { display: flex; gap: 10px; }
+    .btn-primary {
+      flex: 1; height: 50px;
+      border-radius: var(--radius-sm); border: none;
+      background: linear-gradient(135deg, #6c63ff 0%, #9b6cfe 100%);
+      color: var(--on-primary); font-size: 1rem; font-weight: 700; letter-spacing: 0.3px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 4px 18px rgba(108,99,255,0.35);
+      transition: transform .12s, box-shadow .2s, filter .2s;
+      -webkit-tap-highlight-color: transparent;
+    }
     .btn-primary:active { transform: scale(0.98); }
-    [data-theme="light"] .btn-primary { background: linear-gradient(135deg, #5046e4 0%, #7c3aed 100%); box-shadow: 0 4px 18px rgba(80,70,228,0.35); }
+    [data-theme="light"] .btn-primary { background: linear-gradient(135deg, #5046e4 0%, #7c3aed 100%); }
 
-    .btn-row { display: flex; gap: 8px; align-items: stretch; }
-    #add { flex: 1; }
+    .btn-ghost {
+      height: 50px; padding: 0 16px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-hi); background: var(--card);
+      color: var(--text3); font-weight: 600; cursor: pointer;
+    }
 
-    /* Menu button */
     .menu-container { position: relative; }
     .menu-btn-icon {
-      width: 50px;
-      min-height: 50px;
+      width: 50px; height: 50px;
       border-radius: var(--radius-sm);
-      border: 1px solid var(--border);
-      background: var(--card);
+      border: 1px solid var(--border-hi); background: var(--card);
       color: var(--text2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      flex-shrink: 0;
+      display: grid; place-items: center; cursor: pointer;
+      transition: background .2s, border-color .2s, color .2s;
       -webkit-tap-highlight-color: transparent;
     }
-    .menu-btn-icon:hover  { background: var(--primary-dim); border-color: var(--primary); color: var(--primary); }
-    .menu-btn-icon:active { transform: scale(0.95); }
-
     .menu-dropdown {
-      display: none;
-      position: absolute;
-      bottom: calc(100% + 8px);
-      right: 0;
-      background: var(--surface);
-      border: 1px solid var(--border-hi);
-      border-radius: var(--radius);
-      min-width: 160px;
-      z-index: 1000;
-      box-shadow: var(--shadow-lg);
-      overflow: hidden;
+      display: none; position: absolute; bottom: calc(100% + 8px); right: 0;
+      background: var(--surface); border: 1px solid var(--border-hi);
+      border-radius: var(--radius); min-width: 200px; z-index: 1000;
+      box-shadow: var(--shadow-lg); overflow: hidden;
     }
-    .menu-dropdown.show {
-      display: block;
-      animation: dropUp 0.18s cubic-bezier(0.4,0,0.2,1);
-    }
-    @keyframes dropUp {
-      from { opacity: 0; transform: translateY(8px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+    .menu-dropdown.show { display: block; animation: pop .18s cubic-bezier(.4,0,.2,1); }
+    @keyframes pop { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
     .menu-item {
-      padding: 13px 16px;
-      cursor: pointer;
-      border: none;
-      background: transparent;
-      width: 100%;
-      text-align: left;
-      color: var(--text3);
-      font-family: 'Roboto', sans-serif;
-      font-size: 0.875rem;
-      font-weight: 500;
-      transition: all 0.15s;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      min-height: var(--tap); padding: 0 16px; width: 100%;
+      border: none; background: transparent; cursor: pointer; text-align: left;
+      color: var(--text3); font-size: 0.9rem; font-weight: 500;
+      display: flex; align-items: center; gap: 10px;
     }
     .menu-item:not(:last-child) { border-bottom: 1px solid var(--border); }
-    .menu-item:hover { background: var(--primary-dim); color: var(--primary); }
 
-    /* ══════════════════════════════════════════
-       SUMMARY PANEL
-    ══════════════════════════════════════════ */
-    .summary-panel {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 18px;
-    }
+    /* ══════════ SUMMARY ══════════ */
+    .summary-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+    .summary-month { font-size: 0.85rem; font-weight: 600; color: var(--text3); }
+    .summary-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
     .stat-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
-      padding: 16px 14px 14px;
-      position: relative;
-      overflow: hidden;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      padding: 14px 14px 14px 18px;
+      position: relative; overflow: hidden; min-width: 0;
       box-shadow: var(--shadow-sm);
     }
-    .stat-card::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      opacity: 0;
-      transition: opacity 0.2s;
-      background: linear-gradient(135deg, rgba(255,255,255,0.04), transparent);
-    }
-    .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
-    .stat-card:hover::after { opacity: 1; }
-
-    /* coloured stripe on left edge */
     .stat-card::before {
-      content: '';
-      position: absolute;
-      top: 14px; bottom: 14px; left: 0;
-      width: 3px;
-      border-radius: 0 3px 3px 0;
+      content: ''; position: absolute; top: 14px; bottom: 14px; left: 0;
+      width: 3px; border-radius: 0 3px 3px 0;
     }
-    .stat-card.income-card::before  { background: var(--income); box-shadow: 0 0 10px var(--income-glow); }
-    .stat-card.expense-card::before { background: var(--expense); box-shadow: 0 0 10px var(--expense-glow); }
-    .stat-card.carry-card::before   { background: var(--carry); }
-    .stat-card.balance-card::before { background: var(--primary); box-shadow: 0 0 10px var(--primary-glow); }
-    .stat-card.balance-neg::before  { background: var(--expense); box-shadow: 0 0 10px var(--expense-glow); }
+    .income-card::before  { background: var(--income);  box-shadow: 0 0 10px var(--income-glow); }
+    .expense-card::before { background: var(--expense); box-shadow: 0 0 10px var(--expense-glow); }
+    .carry-card::before   { background: var(--carry); }
+    .balance-card::before { background: var(--primary); box-shadow: 0 0 10px var(--primary-glow); }
+    .balance-neg::before  { background: var(--expense); box-shadow: 0 0 10px var(--expense-glow); }
+    .carry-card { background: rgba(var(--carry-rgb), 0.06); border-color: rgba(var(--carry-rgb), 0.22); }
 
     .stat-label {
-      font-size: 0.62rem;
-      font-weight: 700;
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
       margin-bottom: 8px;
-      padding-left: 10px;
     }
-    .income-card  .stat-label { color: var(--income); }
-    .expense-card .stat-label { color: var(--expense); }
-    .carry-card   .stat-label { color: var(--carry); }
-    .balance-card .stat-label { color: var(--primary); }
-    .balance-neg  .stat-label { color: var(--expense); }
-
     .stat-eur {
       font-family: 'Roboto Mono', monospace;
-      font-size: 1.25rem;
-      font-weight: 700;
-      line-height: 1;
-      padding-left: 10px;
-      letter-spacing: -0.5px;
+      font-size: clamp(1.05rem, 4.6vw, 1.3rem);
+      font-weight: 700; line-height: 1.1; letter-spacing: -0.5px;
+      overflow-wrap: anywhere;
     }
-    .income-card  .stat-eur { color: var(--income); }
-    .expense-card .stat-eur { color: var(--expense); }
-    .carry-card   .stat-eur { color: var(--carry); }
-    .balance-card .stat-eur { color: var(--primary); }
-    .balance-neg  .stat-eur { color: var(--expense); }
+    .income-card  :is(.stat-label,.stat-eur) { color: var(--income); }
+    .expense-card :is(.stat-label,.stat-eur) { color: var(--expense); }
+    .carry-card   :is(.stat-label,.stat-eur) { color: var(--carry); }
+    .balance-card :is(.stat-label,.stat-eur) { color: var(--primary); }
+    .balance-neg  :is(.stat-label,.stat-eur) { color: var(--expense); }
+    .stat-bgn { font-family: 'Roboto Mono', monospace; font-size: 0.75rem; color: var(--text2); margin-top: 6px; }
 
-    .stat-bgn {
-      font-family: 'Roboto Mono', monospace;
-      font-size: 0.65rem;
-      color: var(--text2);
-      margin-top: 5px;
-      padding-left: 10px;
-      letter-spacing: 0.2px;
-    }
+    .stat-card.full-width, .spend-row { grid-column: 1 / -1; }
+    .balance-card.full-width .stat-eur, .balance-neg.full-width .stat-eur { font-size: clamp(1.4rem, 6vw, 1.8rem); }
 
-    /* Full-width cards */
-    .stat-card.full-width { grid-column: 1 / -1; }
-
-    /* ── Carry card tint ── */
-    .stat-card.carry-card {
-      background: rgba(var(--carry-rgb), 0.06);
-      border-color: rgba(var(--carry-rgb), 0.2);
-    }
-
-    /* ── Spending ring row ── */
     .spend-row {
-      grid-column: 1 / -1;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 14px 16px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: 14px 16px;
+      display: flex; align-items: center; gap: 16px;
       box-shadow: var(--shadow-sm);
     }
-
-    .ring-wrap {
-      position: relative;
-      flex-shrink: 0;
-      width: 58px;
-      height: 58px;
-    }
-    .ring-svg { width: 58px; height: 58px; transform: rotate(-90deg); }
-    .ring-track { fill: none; stroke: var(--border); stroke-width: 4; }
-    .ring-fill  {
-      fill: none;
-      stroke-width: 4;
-      stroke-linecap: round;
-      stroke-dasharray: 0 100;
-      transition: stroke-dasharray 1s cubic-bezier(0.4,0,0.2,1), stroke 0.4s;
-    }
+    .ring-wrap { position: relative; flex-shrink: 0; width: 60px; height: 60px; }
+    .ring-svg { width: 60px; height: 60px; transform: rotate(-90deg); }
+    .ring-track { fill: none; stroke: var(--border-hi); stroke-width: 3.5; }
+    .ring-fill  { fill: none; stroke-width: 3.5; stroke-linecap: round; transition: stroke-dasharray .8s cubic-bezier(.4,0,.2,1); }
     .ring-label {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Roboto Mono', monospace;
-      font-size: 0.74rem;
-      font-weight: 700;
-      color: var(--text);
+      position: absolute; inset: 0; display: grid; place-items: center;
+      font-family: 'Roboto Mono', monospace; font-size: 0.8rem; font-weight: 700;
     }
-
     .spend-info { flex: 1; min-width: 0; }
-    .spend-title {
-      font-size: 0.62rem;
-      font-weight: 700;
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
-      color: var(--text2);
-      margin-bottom: 8px;
-    }
-    .bar-track {
-      height: 5px;
-      background: var(--border);
-      border-radius: 99px;
-      overflow: hidden;
-      margin-bottom: 7px;
-    }
-    .bar-fill {
-      height: 100%;
-      border-radius: 99px;
-      transition: width 1s cubic-bezier(0.4,0,0.2,1), background 0.4s;
-    }
-    .spend-stats {
-      display: flex;
-      justify-content: space-between;
-      font-family: 'Roboto Mono', monospace;
-      font-size: 0.62rem;
-      color: var(--text2);
-    }
+    .spend-title { font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text2); margin-bottom: 6px; }
+    .spend-text { font-size: 0.875rem; color: var(--text3); line-height: 1.5; }
+    .spend-text strong { font-family: 'Roboto Mono', monospace; color: var(--text); }
 
-    /* ══════════════════════════════════════════
-       MONTH NAV
-    ══════════════════════════════════════════ */
-    .month-nav {
-      display: flex;
-      gap: 7px;
-      margin-bottom: 12px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .month-pill {
-      padding: 8px 16px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text2);
-      font-family: 'Roboto', sans-serif;
-      font-size: 0.82rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease;
+    /* ══════════ MONTH NAV ══════════ */
+    .month-nav { display: flex; gap: 8px; margin-bottom: 12px; align-items: center; flex-wrap: wrap; }
+    .month-pill, .prev-months-btn {
+      min-height: 40px; padding: 0 16px;
+      border-radius: 99px; border: 1px solid var(--border-hi);
+      background: var(--surface); color: var(--text3);
+      font-size: 0.875rem; font-weight: 500; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px;
+      transition: background .2s, border-color .2s, color .2s;
       -webkit-tap-highlight-color: transparent;
-      min-height: 36px;
     }
-    .month-pill:hover  { border-color: var(--primary); color: var(--primary); background: var(--primary-dim); }
-    .month-pill.active { background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 700; }
-
+    .month-pill.active { background: var(--primary); border-color: var(--primary); color: var(--on-primary); font-weight: 700; }
     .prev-months-wrap { position: relative; }
-
-    .prev-months-btn {
-      padding: 8px 14px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text2);
-      font-family: 'Roboto', sans-serif;
-      font-size: 0.82rem;
-      font-weight: 500;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      -webkit-tap-highlight-color: transparent;
-      transition: all 0.2s;
-      min-height: 36px;
-    }
-    .prev-months-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-dim); }
-
     .prev-dropdown {
-      display: none;
-      position: absolute;
-      top: calc(100% + 6px);
-      left: 0;
-      background: var(--surface);
-      border: 1px solid var(--border-hi);
-      border-radius: var(--radius);
-      min-width: 190px;
-      z-index: 1000;
-      box-shadow: var(--shadow-lg);
-      overflow: hidden;
+      display: none; position: absolute; top: calc(100% + 6px); left: 0;
+      background: var(--surface); border: 1px solid var(--border-hi);
+      border-radius: var(--radius); min-width: 200px; max-height: 320px; overflow-y: auto;
+      z-index: 1000; box-shadow: var(--shadow-lg);
     }
-    .prev-dropdown.show {
-      display: block;
-      animation: dropIn 0.18s cubic-bezier(0.4,0,0.2,1);
-    }
-    @keyframes dropIn {
-      from { opacity: 0; transform: translateY(-6px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+    .prev-dropdown.show { display: block; animation: pop .18s cubic-bezier(.4,0,.2,1); }
     .prev-group { border-bottom: 1px solid var(--border); padding: 6px 0; }
     .prev-group:last-child { border-bottom: none; }
-    .prev-group-title {
-      padding: 8px 16px 4px;
-      font-size: 0.65rem;
-      font-weight: 700;
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
-      color: var(--primary);
-    }
+    .prev-group-title { padding: 8px 16px 4px; font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--primary); }
     .prev-item {
-      padding: 10px 16px;
-      cursor: pointer;
-      font-family: 'Roboto', sans-serif;
-      font-size: 0.875rem;
-      font-weight: 400;
-      color: var(--text3);
-      transition: all 0.15s;
+      display: block; width: 100%; min-height: 40px; padding: 0 16px;
+      border: none; background: transparent; text-align: left; cursor: pointer;
+      font-size: 0.9rem; color: var(--text3); transition: background .15s, color .15s;
     }
-    .prev-item:hover   { background: var(--primary-dim); color: var(--primary); padding-left: 20px; }
-    .prev-item.active  { color: var(--primary); font-weight: 600; background: var(--primary-dim); }
+    .prev-item.active { color: var(--primary); font-weight: 600; background: var(--primary-dim); }
 
-    /* ══════════════════════════════════════════
-       MONTH CARD
-    ══════════════════════════════════════════ */
+    /* ══════════ MONTH CARD ══════════ */
     .month-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-xl);
-      overflow: hidden;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-xl); overflow: hidden;
       box-shadow: var(--shadow);
-      animation: fadeUp 0.3s ease;
+      animation: fadeUp .3s ease;
     }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(12px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
-    /* Carry banner */
     .carry-banner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 18px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 12px 16px;
       background: rgba(var(--carry-rgb), 0.07);
-      border-bottom: 1px solid rgba(var(--carry-rgb), 0.15);
+      border-bottom: 1px solid rgba(var(--carry-rgb), 0.18);
     }
-    .carry-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--carry);
-      font-size: 0.8rem;
-      font-weight: 500;
-    }
-    .carry-icon { font-size: 1rem; }
+    .carry-left { display: flex; align-items: center; gap: 8px; color: var(--carry); font-size: 0.875rem; font-weight: 500; }
     .carry-right { text-align: right; }
-    .carry-eur {
-      font-family: 'Roboto Mono', monospace;
-      font-size: 0.92rem;
-      font-weight: 700;
-      color: var(--carry);
-    }
-    .carry-bgn {
-      font-family: 'Roboto Mono', monospace;
-      font-size: 0.65rem;
-      color: var(--text2);
-    }
+    .carry-eur { font-family: 'Roboto Mono', monospace; font-size: 0.95rem; font-weight: 700; color: var(--carry); white-space: nowrap; }
+    .carry-bgn { font-family: 'Roboto Mono', monospace; font-size: 0.75rem; color: var(--text2); }
 
-    /* Transaction list — CHANGE 3: increased from 200px to 380px */
-    .tx-list {
-      max-height: 380px;
-      overflow-y: auto;
-      overscroll-behavior: contain;
-    }
-    .tx-list::-webkit-scrollbar { width: 4px; }
-    .tx-list::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 2px; }
-    [data-theme="light"] .tx-list::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); }
+    .tx-list { max-height: 60vh; overflow-y: auto; overscroll-behavior: contain; }
+    .tx-list::-webkit-scrollbar { width: 6px; }
+    .tx-list::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 3px; }
 
     .tx-row {
       display: grid;
-      grid-template-columns: 1fr auto auto;
-      align-items: center;
-      gap: 10px;
-      padding: 13px 18px;
+      grid-template-columns: 1fr auto;
+      grid-template-areas: "desc amount" "actions actions";
+      align-items: center; column-gap: 12px; row-gap: 8px;
+      padding: 12px 16px;
       border-top: 1px solid var(--border);
       border-left: 3px solid transparent;
-      transition: background 0.15s;
-      animation: slideIn 0.22s ease;
+      transition: background .15s;
     }
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateX(-8px); }
-      to   { opacity: 1; transform: translateX(0); }
-    }
-    .tx-row:hover { background: var(--card-hover); }
+    .tx-row:first-child { border-top: none; }
     .tx-row.income-row  { border-left-color: var(--income); }
     .tx-row.expense-row { border-left-color: var(--expense); }
+    .tx-main   { grid-area: desc; min-width: 0; }
+    .tx-amount { grid-area: amount; text-align: right; }
+    .tx-actions { grid-area: actions; display: flex; gap: 8px; justify-content: flex-end; }
 
-    .tx-desc {
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: var(--text);
-      word-break: break-word;
-      line-height: 1.35;
-    }
-    .tx-meta {
-      font-family: 'Roboto Mono', monospace;
-      font-size: 0.63rem;
-      color: var(--text2);
-      margin-top: 3px;
-    }
-
-    .tx-amount { text-align: right; }
-    .tx-eur {
-      font-family: 'Roboto Mono', monospace;
-      font-size: 0.88rem;
-      font-weight: 700;
-      white-space: nowrap;
-    }
+    .tx-desc { font-size: 0.95rem; font-weight: 500; color: var(--text); overflow-wrap: anywhere; line-height: 1.35; }
+    .tx-meta { font-family: 'Roboto Mono', monospace; font-size: 0.75rem; color: var(--text2); margin-top: 3px; }
+    .tx-eur  { font-family: 'Roboto Mono', monospace; font-size: 0.95rem; font-weight: 700; white-space: nowrap; }
     .tx-eur.income  { color: var(--income); }
     .tx-eur.expense { color: var(--expense); }
-    .tx-bgn {
-      font-family: 'Roboto Mono', monospace;
-      font-size: 0.63rem;
-      color: var(--text2);
-      text-align: right;
-      margin-top: 3px;
-    }
+    .tx-bgn { font-family: 'Roboto Mono', monospace; font-size: 0.75rem; color: var(--text2); margin-top: 3px; white-space: nowrap; }
 
-    .tx-actions { display: flex; gap: 6px; align-items: center; }
     .btn-action {
-      width: 32px;
-      height: 32px;
-      border-radius: 9px;
-      border: 1px solid var(--border);
-      background: var(--card);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.18s;
-      color: var(--text2);
+      min-width: var(--tap); height: 36px; padding: 0 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-hi); background: var(--card);
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      cursor: pointer; color: var(--text3); font-size: 0.8rem; font-weight: 500;
+      transition: background .15s, border-color .15s, color .15s;
       -webkit-tap-highlight-color: transparent;
     }
-    .btn-action.edit-btn  { }
-    .btn-action.del-btn   { }
-    .btn-action.edit-btn:hover  { background: var(--primary-dim); border-color: var(--primary); color: var(--primary); transform: scale(1.1); }
-    .btn-action.del-btn:hover   { background: var(--expense-dim); border-color: var(--expense); color: var(--expense); transform: scale(1.1); }
-    .btn-action:active { transform: scale(0.93); }
-    [data-theme="light"] .btn-action { background: #fff; }
-    [data-theme="light"] .btn-action.edit-btn:hover { background: #eef2ff; }
-    [data-theme="light"] .btn-action.del-btn:hover  { background: #fff1f2; }
+    .btn-action:active { transform: scale(0.95); }
 
-    .empty-state {
-      padding: 36px 20px;
-      text-align: center;
-      color: var(--text2);
-      font-size: 0.875rem;
-      font-style: italic;
-    }
-    .empty-state svg { margin: 0 auto 12px; display: block; opacity: 0.3; }
+    .empty-state { padding: 40px 20px; text-align: center; color: var(--text2); font-size: 0.95rem; }
+    .empty-state svg { margin: 0 auto 12px; display: block; opacity: 0.5; }
+    .empty-state small { display: block; margin-top: 4px; font-size: 0.8rem; }
 
-    /* ══════════════════════════════════════════
-       TOAST / INDICATOR
-    ══════════════════════════════════════════ */
+    /* ══════════ TOAST ══════════ */
     .indicator {
-      display: none;
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
+      display: none; position: fixed;
+      bottom: calc(24px + env(safe-area-inset-bottom)); left: 50%;
       transform: translateX(-50%);
-      background: var(--card);
-      border: 1px solid var(--border-hi);
-      color: var(--text);
-      padding: 10px 20px;
-      border-radius: 10px;
-      font-size: 0.82rem;
-      font-weight: 500;
-      z-index: 2000;
-      box-shadow: var(--shadow-lg);
-      white-space: nowrap;
-      max-width: calc(100vw - 32px);
+      background: var(--card); border: 1px solid var(--border-hi); color: var(--text);
+      padding: 12px 20px; border-radius: 99px;
+      font-size: 0.875rem; font-weight: 500;
+      z-index: 2000; box-shadow: var(--shadow-lg);
+      white-space: nowrap; max-width: calc(100vw - 32px);
     }
-    .indicator.show {
-      display: block;
-      animation: toastIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
+    .indicator.show { display: block; animation: toastIn .3s cubic-bezier(.34,1.56,.64,1); }
     @keyframes toastIn {
-      from { opacity: 0; transform: translateX(-50%) translateY(16px) scale(0.9); }
+      from { opacity: 0; transform: translateX(-50%) translateY(16px) scale(.92); }
       to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
     }
 
-    /* ══════════════════════════════════════════
-       GUIDE TOUR
-    ══════════════════════════════════════════ */
+    /* ══════════ GUIDE TOUR ══════════ */
     #guide-highlight {
-      position: fixed;
-      pointer-events: none;
-      border-radius: 18px;
-      z-index: 9998;
-      box-shadow: 0 0 0 9999px rgba(0,0,0,0.78);
-      outline: 2px solid var(--primary);
-      outline-offset: 4px;
-      transition:
-        left   0.32s cubic-bezier(.4,0,.2,1),
-        top    0.32s cubic-bezier(.4,0,.2,1),
-        width  0.32s cubic-bezier(.4,0,.2,1),
-        height 0.32s cubic-bezier(.4,0,.2,1);
+      position: fixed; pointer-events: none; border-radius: 18px; z-index: 9998;
+      box-shadow: 0 0 0 9999px rgba(0,0,0,0.75);
+      outline: 2px solid var(--primary); outline-offset: 4px;
+      transition: left .32s cubic-bezier(.4,0,.2,1), top .32s cubic-bezier(.4,0,.2,1),
+                  width .32s cubic-bezier(.4,0,.2,1), height .32s cubic-bezier(.4,0,.2,1);
     }
     #guide-tooltip {
-      position: fixed;
-      z-index: 9999;
-      background: var(--card);
-      border: 1px solid var(--border-hi);
-      border-radius: var(--radius-lg);
-      padding: 20px 20px 16px;
-      max-width: 320px;
-      width: calc(100vw - 32px);
+      position: fixed; z-index: 9999;
+      background: var(--surface); border: 1px solid var(--border-hi);
+      border-radius: var(--radius-lg); padding: 20px 20px 16px;
+      max-width: 340px; width: calc(100vw - 32px);
       box-shadow: var(--shadow-lg);
     }
-    .guide-title {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: var(--primary);
-      margin-bottom: 8px;
-    }
-    .guide-body {
-      font-size: 0.82rem;
-      font-weight: 400;
-      color: var(--text3);
-      line-height: 1.65;
-      margin-bottom: 16px;
-    }
+    .guide-title { font-size: 1rem; font-weight: 700; color: var(--primary); margin-bottom: 8px; }
+    .guide-body  { font-size: 0.9rem; color: var(--text3); line-height: 1.6; margin-bottom: 16px; }
     .guide-footer { display: flex; align-items: center; gap: 8px; }
-    #guide-skip {
-      background: transparent;
-      border: 1px solid var(--border-hi);
-      color: var(--text2);
-      font-family: 'Roboto', sans-serif;
-      font-size: 0.78rem;
-      font-weight: 500;
-      padding: 7px 14px;
-      border-radius: 8px;
-      cursor: pointer;
-      min-height: unset;
-      transition: all 0.15s;
+    #guide-skip, #guide-next {
+      min-height: 40px; padding: 0 16px; border-radius: var(--radius-sm);
+      font-size: 0.85rem; font-weight: 600; cursor: pointer;
     }
-    #guide-skip:hover { border-color: var(--expense); color: var(--expense); }
-    #guide-counter {
-      flex: 1;
-      text-align: center;
-      font-size: 0.72rem;
-      color: var(--text2);
-      font-variant-numeric: tabular-nums;
-    }
-    #guide-next {
-      background: linear-gradient(135deg, #6c63ff, #9b6cfe);
-      border: none;
-      color: #fff;
-      font-family: 'Roboto', sans-serif;
-      font-size: 0.78rem;
-      font-weight: 700;
-      padding: 7px 18px;
-      border-radius: 8px;
-      cursor: pointer;
-      min-height: unset;
-      letter-spacing: 0.3px;
-    }
-    #guide-next:hover { opacity: 0.88; }
+    #guide-skip { background: transparent; border: 1px solid var(--border-hi); color: var(--text2); }
+    #guide-next { background: var(--primary); border: none; color: var(--on-primary); }
+    #guide-counter { flex: 1; text-align: center; font-size: 0.8rem; color: var(--text2); }
 
-    /* ══════════════════════════════════════════
-       RESPONSIVE — larger screens just center
-    ══════════════════════════════════════════ */
+    /* ══════════ HOVER (mouse only — no sticky hover on touch) ══════════ */
+    @media (hover: hover) {
+      .icon-btn:hover { background: var(--primary-dim); border-color: var(--primary); color: var(--primary); }
+      .btn-primary:hover { filter: brightness(1.08); box-shadow: 0 6px 24px rgba(108,99,255,0.45); }
+      .btn-ghost:hover, .menu-btn-icon:hover { border-color: var(--primary); color: var(--primary); }
+      .menu-item:hover, .prev-item:hover { background: var(--primary-dim); color: var(--primary); }
+      .month-pill:not(.active):hover, .prev-months-btn:hover { border-color: var(--primary); color: var(--primary); }
+      .seg-btn[aria-checked="false"]:hover { color: var(--text); }
+      .tx-row:hover { background: var(--card-hover); }
+      .btn-action.edit-btn:hover { background: var(--primary-dim); border-color: var(--primary); color: var(--primary); }
+      .btn-action.del-btn:hover  { background: var(--expense-dim); border-color: var(--expense); color: var(--expense); }
+      #guide-skip:hover { border-color: var(--expense); color: var(--expense); }
+      #guide-next:hover { filter: brightness(1.1); }
+    }
+
+    /* ══════════ RESPONSIVE ══════════ */
+    /* Phones: actions sit on their own row with text labels */
+    @media (max-width: 479px) {
+      .live-date .full { display: none; }
+    }
     @media (min-width: 480px) {
-      .container { padding: 20px 20px 50px; }
-    }
-    @media (min-width: 600px) {
-      .stat-eur { font-size: 1.35rem; }
-    }
-
-    /* ── CHANGE 2: prevent auto-zoom on input focus on iOS / Android ──────────
-       iOS Safari zooms in whenever a focused input has font-size < 16px.
-       We override to 16px on touch devices; !important wins over ID selectors. */
-    @media (max-width: 767px) {
-      input, select {
-        font-size: 16px !important;
+      .live-date .short { display: none; }
+      .tx-row {
+        grid-template-columns: 1fr auto auto;
+        grid-template-areas: "desc amount actions";
       }
+      .btn-action .lbl { display: none; }
+      .btn-action { width: 40px; min-width: 40px; height: 40px; padding: 0; }
     }
 
-    /* Reduced motion */
+    /* Tablets */
+    @media (min-width: 768px) {
+      :root { --gutter: 28px; }
+      .shell { max-width: 820px; }
+      .app-header { margin-bottom: 24px; }
+      .form-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; }
+      .form-row  { grid-template-columns: 1fr 1fr; }
+      .summary-panel { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+      .tx-row { padding: 14px 20px; }
+      .tx-list { max-height: 65vh; }
+    }
+
+    /* Desktop: two-column dashboard, sidebar stays put while history scrolls */
+    @media (min-width: 1080px) {
+      :root { --gutter: 40px; }
+      .shell { max-width: 1240px; }
+      .container { padding-top: 24px; }
+      .layout { display: grid; grid-template-columns: 400px minmax(0, 1fr); gap: 28px; align-items: start; }
+      .side { position: sticky; top: 0; }
+      .form-grid { display: flex; flex-direction: column; gap: 12px; }
+      .summary-panel { grid-template-columns: 1fr 1fr; }
+      .tx-list { max-height: calc(100dvh - 190px); }
+      .stat-eur { font-size: 1.3rem; }
+    }
+    @media (min-width: 1440px) {
+      .shell { max-width: 1360px; }
+      .layout { grid-template-columns: 440px minmax(0, 1fr); }
+    }
+
+    /* Short landscape phones: don't trap the list in a tiny scroll box */
+    @media (max-height: 500px) and (orientation: landscape) {
+      .tx-list { max-height: none; }
+      .side { position: static; }
+    }
+
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        transition-duration: 0.01ms !important;
-      }
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
     }
   </style>
 </head>
 <body>
 <div class="container">
+<div class="shell">
 
   <!-- HEADER -->
-  <header>
+  <header class="app-header">
     <div class="header-brand">
-      <h2>RTDN | myBalance €</h2>
+      <h1>RTDN | myBalance €</h1>
       <div class="live-date" id="live-date"></div>
     </div>
     <div class="header-actions">
-      <button class="icon-btn" id="auto-theme-btn" title="Auto theme: follows device">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <button class="icon-btn" id="auto-theme-btn" aria-label="Auto theme" title="Auto theme: follows device">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
         </svg>
       </button>
-      <button class="icon-btn" id="theme-toggle" title="Toggle theme"></button>
-      <button class="icon-btn" id="guide-btn" title="Show guide">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <button class="icon-btn" id="theme-toggle" aria-label="Toggle light or dark theme" title="Toggle theme"></button>
+      <button class="icon-btn" id="guide-btn" aria-label="Show guide" title="Show guide">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
         </svg>
       </button>
     </div>
   </header>
 
-  <!-- FORM -->
-  <div class="form-card" role="form" aria-label="Add transaction">
-    <input id="desc" placeholder="Description" aria-label="Transaction description" maxlength="100" autocomplete="off">
-    <div class="form-row">
-      <input id="amount" type="number" step="0.01" min="0.01" max="999999.99" placeholder="0.00" inputmode="decimal" aria-label="Amount">
-      <select id="type" aria-label="Transaction type">
-        <option value="income">Income</option>
-        <option value="expense">Expense</option>
-      </select>
-    </div>
-    <div class="btn-row">
-      <button class="btn-primary" id="add" aria-label="Add transaction">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
-        <span id="add-label">Add Transaction</span>
-      </button>
-      <div class="menu-container">
-        <button class="menu-btn-icon" id="menu-btn" aria-label="Data backup menu">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/>
-          </svg>
-        </button>
-        <div id="menu-dropdown" class="menu-dropdown">
-          <button class="menu-item" onclick="FileManager.exportToTxt()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Download backup
-          </button>
-          <button class="menu-item" onclick="document.getElementById('file-input').click()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            Upload backup
-          </button>
+  <div class="layout">
+    <aside class="side">
+
+      <!-- FORM -->
+      <form class="form-card" id="tx-form" aria-label="Add transaction" novalidate onsubmit="return false">
+        <div class="form-head">
+          <span class="section-title" id="form-title">New transaction</span>
+          <span class="edit-badge" id="edit-badge" hidden>Editing</span>
         </div>
-      </div>
-    </div>
-    <input id="file-input" type="file" accept=".txt" style="display:none;">
+        <div class="form-grid">
+          <div class="field">
+            <label for="desc">Description</label>
+            <input id="desc" placeholder="e.g. Salary, Groceries" maxlength="100" autocomplete="off" enterkeyhint="next">
+          </div>
+          <div class="field">
+            <label for="amount">Amount (€)</label>
+            <input id="amount" type="number" step="0.01" min="0.01" max="999999.99" placeholder="0.00" inputmode="decimal" enterkeyhint="done">
+          </div>
+        </div>
+        <div class="field">
+          <span class="field-label sr-only" id="type-label">Type</span>
+          <div class="seg" role="radiogroup" aria-labelledby="type-label">
+            <button type="button" class="seg-btn" role="radio" data-type="income" aria-checked="true">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+              Income
+            </button>
+            <button type="button" class="seg-btn" role="radio" data-type="expense" aria-checked="false">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+              Expense
+            </button>
+          </div>
+          <select id="type" hidden>
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+          </select>
+        </div>
+        <div class="btn-row">
+          <button type="button" class="btn-ghost" id="cancel-edit" hidden>Cancel</button>
+          <button type="button" class="btn-primary" id="add">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            <span id="add-label">Add Transaction</span>
+          </button>
+          <div class="menu-container">
+            <button type="button" class="menu-btn-icon" id="menu-btn" aria-label="Data backup menu" aria-haspopup="true" aria-expanded="false">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/>
+              </svg>
+            </button>
+            <div id="menu-dropdown" class="menu-dropdown" role="menu">
+              <button type="button" role="menuitem" class="menu-item" onclick="FileManager.exportToTxt()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download backup
+              </button>
+              <button type="button" role="menuitem" class="menu-item" onclick="document.getElementById('file-input').click()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Upload backup
+              </button>
+            </div>
+          </div>
+        </div>
+        <input id="file-input" type="file" accept=".txt" hidden>
+      </form>
+
+      <!-- SUMMARY -->
+      <section id="summary" aria-label="Month summary"></section>
+    </aside>
+
+    <!-- MONTHS -->
+    <main class="main">
+      <section id="months" aria-label="Transactions by month"></section>
+    </main>
   </div>
 
-  <!-- SUMMARY -->
-  <div id="summary" role="region" aria-label="Current month summary"></div>
-
-  <!-- MONTHS -->
-  <div id="months" role="region" aria-label="Transactions by month"></div>
-
-  <!-- TOAST -->
   <div id="indicator" class="indicator" role="status" aria-live="polite"></div>
 
+</div>
 </div>
 
 <!-- GUIDE TOUR -->
 <div id="guide-highlight" style="display:none;"></div>
-<div id="guide-tooltip" style="display:none;" role="dialog" aria-modal="true" aria-label="App guide">
+<div id="guide-tooltip" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="guide-title">
   <div class="guide-title" id="guide-title"></div>
   <div class="guide-body" id="guide-body"></div>
   <div class="guide-footer">
@@ -973,9 +657,7 @@
 </div>
 
 <script>
-/* ════════════════════════════════════════════
-   CONFIG
-════════════════════════════════════════════ */
+/* ════════════ CONFIG ════════════ */
 const CONFIG = {
   STORAGE_KEY: 'salary-tracker-monthly-v3',
   THEME_KEY: 'salary-tracker-theme',
@@ -985,6 +667,7 @@ const CONFIG = {
   MIN_AMOUNT: 0.01,
   RATE_LIMIT_MS: 300,
 };
+const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 let _monthDropdownEl = null;
 
@@ -996,9 +679,7 @@ const STATE = {
   renderTimeout: null
 };
 
-/* ════════════════════════════════════════════
-   SECURITY
-════════════════════════════════════════════ */
+/* ════════════ SECURITY ════════════ */
 const Security = {
   checkRateLimit() {
     const now = Date.now();
@@ -1020,12 +701,14 @@ const Security = {
   }
 };
 
-/* ════════════════════════════════════════════
-   FORMATTER
-════════════════════════════════════════════ */
+/* ════════════ FORMATTER ════════════ */
 const Formatter = {
   getMonthKey(d = new Date()) {
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  },
+  monthLabel(key) {
+    const [y, m] = key.split('-');
+    return `${MONTH_NAMES[parseInt(m) - 1]} ${y}`;
   },
   formatDate(timestamp) {
     try {
@@ -1041,22 +724,14 @@ const Formatter = {
   convertToBGN(eur) {
     return (eur * CONFIG.EUR_TO_BGN).toFixed(2);
   },
-  /* New filename date: dd.mm.yy - hh.mm.ss */
   filenameDateStamp() {
     const now = new Date();
-    const dd  = String(now.getDate()).padStart(2, '0');
-    const mm  = String(now.getMonth() + 1).padStart(2, '0');
-    const yy  = String(now.getFullYear()).slice(-2);
-    const hh  = String(now.getHours()).padStart(2, '0');
-    const min = String(now.getMinutes()).padStart(2, '0');
-    const ss  = String(now.getSeconds()).padStart(2, '0');
-    return `${dd}.${mm}.${yy} - ${hh}.${min}.${ss}`;
+    const p = n => String(n).padStart(2, '0');
+    return `${p(now.getDate())}.${p(now.getMonth() + 1)}.${String(now.getFullYear()).slice(-2)} - ${p(now.getHours())}.${p(now.getMinutes())}.${p(now.getSeconds())}`;
   }
 };
 
-/* ════════════════════════════════════════════
-   DATA MANAGER
-════════════════════════════════════════════ */
+/* ════════════ DATA MANAGER ════════════ */
 const DataManager = {
   save() {
     try {
@@ -1137,9 +812,15 @@ const DataManager = {
   }
 };
 
-/* ════════════════════════════════════════════
-   UI
-════════════════════════════════════════════ */
+/* ════════════ UI ════════════ */
+const ICONS = {
+  edit: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
+  del:  `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>`,
+  carry:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>`,
+  cal:  `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+  empty:`<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>`
+};
+
 const UI = {
   render() {
     clearTimeout(STATE.renderTimeout);
@@ -1151,11 +832,15 @@ const UI = {
     if (STATE.selectedMonth && STATE.selectedMonth !== realCk) {
       DataManager.refreshCarry(STATE.selectedMonth);
     }
+    this.renderMonths();   // creates the current month if missing, so run before summary
     this.renderSummary();
-    this.renderMonths();
-    document.getElementById('add-label').textContent = STATE.editing ? 'Save Edit' : 'Add Transaction';
-    const addBtn = document.getElementById('add');
-    addBtn.querySelector('svg').style.display = STATE.editing ? 'none' : '';
+    const editing = !!STATE.editing;
+    document.getElementById('add-label').textContent = editing ? 'Save changes' : 'Add Transaction';
+    document.getElementById('add').querySelector('svg').style.display = editing ? 'none' : '';
+    document.getElementById('cancel-edit').hidden = !editing;
+    document.getElementById('edit-badge').hidden = !editing;
+    document.getElementById('form-title').textContent = editing ? 'Edit transaction' : 'New transaction';
+    document.getElementById('tx-form').classList.toggle('editing', editing);
   },
 
   renderSummary() {
@@ -1163,11 +848,8 @@ const UI = {
     const cm = STATE.months[ck];
     if (!cm) { document.getElementById('summary').innerHTML = ''; return; }
 
-    const carry   = cm.carry;
-    const income  = cm.income;
-    const expense = cm.expense;
+    const { carry, income, expense } = cm;
     const balance = carry + income - expense;
-
     const balCls = balance < 0 ? 'balance-neg' : 'balance-card';
 
     const carryHTML = carry !== 0 ? `
@@ -1176,11 +858,38 @@ const UI = {
         <div class="stat-eur">${carry >= 0 ? '+' : ''}${carry.toFixed(2)} €</div>
         <div class="stat-bgn">≈ ${Formatter.convertToBGN(Math.abs(carry))} BGN</div>
       </div>` : '';
-
     const balSpan = carry === 0 ? ' full-width' : '';
 
+    // Share of available money (income + positive carry) already spent
+    const available = income + Math.max(carry, 0);
+    const pct = available > 0 ? Math.min(100, Math.round(expense / available * 100)) : (expense > 0 ? 100 : 0);
+    const ringColor = pct < 60 ? 'var(--income)' : pct < 85 ? 'var(--carry)' : 'var(--expense)';
+    const spendHTML = (available > 0 || expense > 0) ? `
+      <div class="spend-row">
+        <div class="ring-wrap" role="img" aria-label="${pct}% of available money spent">
+          <svg class="ring-svg" viewBox="0 0 36 36" aria-hidden="true">
+            <circle class="ring-track" cx="18" cy="18" r="15.915"/>
+            <circle class="ring-fill" cx="18" cy="18" r="15.915" stroke="${ringColor}" stroke-dasharray="${pct} 100"/>
+          </svg>
+          <span class="ring-label">${pct}%</span>
+        </div>
+        <div class="spend-info">
+          <div class="spend-title">Spent of available</div>
+          <div class="spend-text"><strong>${expense.toFixed(2)} €</strong> of <strong>${available.toFixed(2)} €</strong></div>
+        </div>
+      </div>` : '';
+
     document.getElementById('summary').innerHTML = `
+      <div class="summary-head">
+        <h2 class="section-title">Summary</h2>
+        <span class="summary-month">${Formatter.monthLabel(ck)}</span>
+      </div>
       <div class="summary-panel">
+        <div class="stat-card ${balCls}${balSpan}">
+          <div class="stat-label">Balance</div>
+          <div class="stat-eur">${balance >= 0 ? '+' : ''}${balance.toFixed(2)} €</div>
+          <div class="stat-bgn">≈ ${Formatter.convertToBGN(Math.abs(balance))} BGN</div>
+        </div>
         <div class="stat-card income-card">
           <div class="stat-label">Income</div>
           <div class="stat-eur">+${income.toFixed(2)} €</div>
@@ -1192,11 +901,7 @@ const UI = {
           <div class="stat-bgn">≈ ${Formatter.convertToBGN(expense)} BGN</div>
         </div>
         ${carryHTML}
-        <div class="stat-card ${balCls}${balSpan}">
-          <div class="stat-label">Balance</div>
-          <div class="stat-eur">${balance >= 0 ? '+' : ''}${balance.toFixed(2)} €</div>
-          <div class="stat-bgn">≈ ${Formatter.convertToBGN(Math.abs(balance))} BGN</div>
-        </div>
+        ${spendHTML}
       </div>`;
   },
 
@@ -1204,7 +909,7 @@ const UI = {
     const c = document.getElementById('months');
     c.innerHTML = '';
 
-    const realCk    = Formatter.getMonthKey();
+    const realCk     = Formatter.getMonthKey();
     const displayKey = STATE.selectedMonth || realCk;
     const keys = Object.keys(STATE.months).sort().reverse();
 
@@ -1213,24 +918,30 @@ const UI = {
       keys.unshift(realCk);
     }
 
-    /* ── Month navigation ── */
-    const nav = document.createElement('div');
+    /* Month navigation */
+    const nav = document.createElement('nav');
     nav.className = 'month-nav';
-
-    const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const [curY, curM] = realCk.split('-');
+    nav.setAttribute('aria-label', 'Choose month');
 
     const curPill = document.createElement('button');
     curPill.className = `month-pill${displayKey === realCk ? ' active' : ''}`;
-    curPill.textContent = `${monthNames[parseInt(curM)-1]} ${curY}`;
+    curPill.textContent = Formatter.monthLabel(realCk);
+    if (displayKey === realCk) curPill.setAttribute('aria-current', 'true');
     curPill.onclick = () => UI.switchMonth(realCk);
     nav.appendChild(curPill);
+
+    if (displayKey !== realCk) {
+      const sel = document.createElement('button');
+      sel.className = 'month-pill active';
+      sel.setAttribute('aria-current', 'true');
+      sel.textContent = Formatter.monthLabel(displayKey);
+      nav.appendChild(sel);
+    }
 
     const byYear = {};
     keys.filter(k => k !== realCk).forEach(k => {
       const [y] = k.split('-');
-      if (!byYear[y]) byYear[y] = [];
-      byYear[y].push(k);
+      (byYear[y] = byYear[y] || []).push(k);
     });
 
     if (Object.keys(byYear).length > 0) {
@@ -1239,7 +950,9 @@ const UI = {
 
       const btn = document.createElement('button');
       btn.className = 'prev-months-btn';
-      btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Previous`;
+      btn.setAttribute('aria-haspopup', 'true');
+      btn.setAttribute('aria-expanded', 'false');
+      btn.innerHTML = `${ICONS.cal} Previous`;
 
       const dropdown = document.createElement('div');
       dropdown.className = 'prev-dropdown';
@@ -1254,17 +967,21 @@ const UI = {
         grp.appendChild(title);
 
         byYear[year].sort().reverse().forEach(mk => {
-          const item = document.createElement('div');
+          const item = document.createElement('button');
+          item.type = 'button';
           item.className = `prev-item${mk === displayKey ? ' active' : ''}`;
-          const [, m] = mk.split('-');
-          item.textContent = monthNames[parseInt(m)-1];
+          item.textContent = MONTH_NAMES[parseInt(mk.split('-')[1]) - 1];
           item.onclick = () => { UI.switchMonth(mk); dropdown.classList.remove('show'); };
           grp.appendChild(item);
         });
         dropdown.appendChild(grp);
       });
 
-      btn.onclick = (e) => { e.stopPropagation(); dropdown.classList.toggle('show'); };
+      btn.onclick = (e) => {
+        e.stopPropagation();
+        const open = dropdown.classList.toggle('show');
+        btn.setAttribute('aria-expanded', String(open));
+      };
       wrap.appendChild(btn);
       wrap.appendChild(dropdown);
       nav.appendChild(wrap);
@@ -1274,69 +991,50 @@ const UI = {
 
     c.appendChild(nav);
 
-    /* ── Transaction card ── */
+    /* Transaction card */
     const data = STATE.months[displayKey];
     if (!data) return;
 
     const card = document.createElement('div');
     card.className = 'month-card';
 
-    const list = document.createElement('div');
-    list.className = 'tx-list';
-
     if (data.carry !== 0) {
       const banner = document.createElement('div');
       banner.className = 'carry-banner';
       banner.innerHTML = `
-        <div class="carry-left">
-          <span class="carry-icon">↩</span>
-          <span>Carried from previous month</span>
-        </div>
+        <div class="carry-left">${ICONS.carry}<span>Carried from previous month</span></div>
         <div class="carry-right">
           <div class="carry-eur">${data.carry >= 0 ? '+' : ''}${data.carry.toFixed(2)} €</div>
           <div class="carry-bgn">≈ ${Formatter.convertToBGN(Math.abs(data.carry))} BGN</div>
         </div>`;
-      list.appendChild(banner);
+      card.appendChild(banner);
     }
 
-    if (data.tx.length === 0 && data.carry === 0) {
+    const list = document.createElement('div');
+    list.className = 'tx-list';
+
+    if (data.tx.length === 0) {
       const empty = document.createElement('div');
       empty.className = 'empty-state';
-      empty.innerHTML = `
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-        </svg>
-        No transactions this month`;
+      empty.innerHTML = `${ICONS.empty}No transactions this month<small>Add your first one with the form.</small>`;
       list.appendChild(empty);
     } else {
       data.tx.forEach((t, i) => {
         const row = document.createElement('div');
         row.className = `tx-row ${t.type}-row`;
-        const bgn = Formatter.convertToBGN(t.amt);
-        const date = Formatter.formatDate(t.ts);
+        const desc = this.esc(t.desc);
         row.innerHTML = `
-          <div>
-            <div class="tx-desc">${this.esc(t.desc)}</div>
-            <div class="tx-meta">${date}</div>
+          <div class="tx-main">
+            <div class="tx-desc">${desc}</div>
+            <div class="tx-meta">${Formatter.formatDate(t.ts)}</div>
           </div>
           <div class="tx-amount">
             <div class="tx-eur ${t.type}">${t.type === 'income' ? '+' : '-'}${Number(t.amt).toFixed(2)} €</div>
-            <div class="tx-bgn">≈ ${bgn} BGN</div>
+            <div class="tx-bgn">≈ ${Formatter.convertToBGN(t.amt)} BGN</div>
           </div>
           <div class="tx-actions">
-            <button class="btn-action edit-btn" onclick="UI.startEdit('${displayKey}',${i})" title="Edit" aria-label="Edit">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-              </svg>
-            </button>
-            <button class="btn-action del-btn" onclick="UI.removeTx('${displayKey}',${i})" title="Delete" aria-label="Delete">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="3 6 5 6 21 6"/>
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                <line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>
-              </svg>
-            </button>
+            <button class="btn-action edit-btn" onclick="UI.startEdit('${displayKey}',${i})" title="Edit" aria-label="Edit ${desc}">${ICONS.edit}<span class="lbl">Edit</span></button>
+            <button class="btn-action del-btn" onclick="UI.removeTx('${displayKey}',${i})" title="Delete" aria-label="Delete ${desc}">${ICONS.del}<span class="lbl">Delete</span></button>
           </div>`;
         list.appendChild(row);
       });
@@ -1364,7 +1062,8 @@ const UI = {
     document.getElementById('type').value   = t.type;
     this.updateTypeSelect(t.type);
     STATE.editing = { monthKey, idx };
-    document.getElementById('desc').focus();
+    document.getElementById('tx-form').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    document.getElementById('desc').focus({ preventScroll: true });
     this.render();
   },
 
@@ -1382,16 +1081,18 @@ const UI = {
   },
 
   updateTypeSelect(type) {
-    const sel = document.getElementById('type');
-    sel.classList.remove('income-select','expense-select');
-    sel.classList.add(`${type}-select`);
+    document.querySelectorAll('.seg-btn').forEach(b =>
+      b.setAttribute('aria-checked', String(b.dataset.type === type)));
   },
 
   addTransaction() {
-    const desc = document.getElementById('desc').value.trim();
-    const amt  = document.getElementById('amount').value;
+    const descEl = document.getElementById('desc');
+    const amtEl  = document.getElementById('amount');
+    const desc = descEl.value.trim();
+    const amt  = amtEl.value;
     const type = document.getElementById('type').value;
-    if (!desc || !amt) return;
+    if (!desc) { descEl.focus(); DataManager.showIndicator('Enter a description'); return; }
+    if (!amt)  { amtEl.focus();  DataManager.showIndicator('Enter an amount'); return; }
     const ok = STATE.editing
       ? DataManager.updateTransaction(STATE.editing.monthKey, STATE.editing.idx, desc, amt, type)
       : DataManager.addTransaction(desc, amt, type);
@@ -1399,9 +1100,7 @@ const UI = {
   }
 };
 
-/* ════════════════════════════════════════════
-   THEME
-════════════════════════════════════════════ */
+/* ════════════ THEME ════════════ */
 const Theme = {
   init() {
     const stored = localStorage.getItem(CONFIG.THEME_KEY);
@@ -1410,7 +1109,6 @@ const Theme = {
 
     document.getElementById('theme-toggle').addEventListener('click', () => this.toggle());
     document.getElementById('auto-theme-btn').addEventListener('click', () => this.toggleAuto());
-    document.getElementById('type').addEventListener('change', e => UI.updateTypeSelect(e.target.value));
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
       if (!localStorage.getItem(CONFIG.THEME_KEY)) { this.apply(e.matches ? 'dark' : 'light'); this.updateAutoBtn(); }
     });
@@ -1421,8 +1119,7 @@ const Theme = {
     this.updateToggleIcon(theme);
   },
   toggle() {
-    const cur = document.body.getAttribute('data-theme');
-    const next = cur === 'dark' ? 'light' : 'dark';
+    const next = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     localStorage.setItem(CONFIG.THEME_KEY, next);
     this.apply(next);
     this.updateAutoBtn();
@@ -1440,30 +1137,20 @@ const Theme = {
   updateAutoBtn() {
     const btn = document.getElementById('auto-theme-btn');
     if (!btn) return;
-    btn.classList.toggle('auto-active', this.isAuto());
-    btn.title = this.isAuto() ? 'Auto theme ON — follows your device (click to disable)' : 'Auto theme OFF — click to follow device theme';
+    const auto = this.isAuto();
+    btn.classList.toggle('auto-active', auto);
+    btn.setAttribute('aria-pressed', String(auto));
+    btn.title = auto ? 'Auto theme ON — follows your device (click to disable)' : 'Auto theme OFF — click to follow device theme';
   },
   updateToggleIcon(theme) {
     const btn = document.getElementById('theme-toggle');
-    if (theme === 'dark') {
-      btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="5"/>
-        <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-      </svg>`;
-    } else {
-      btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-      </svg>`;
-    }
+    btn.innerHTML = theme === 'dark'
+      ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`
+      : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`;
   }
 };
 
-/* ════════════════════════════════════════════
-   FILE MANAGER
-════════════════════════════════════════════ */
+/* ════════════ FILE MANAGER (unchanged format) ════════════ */
 const FileManager = {
   exportToTxt() {
     try {
@@ -1505,6 +1192,7 @@ const FileManager = {
     } catch (e) {
       DataManager.showIndicator('✕ Export failed');
     }
+    Menu.close();
   },
 
   importFromTxt(file) {
@@ -1577,104 +1265,119 @@ const FileManager = {
   }
 };
 
-/* ════════════════════════════════════════════
-   EVENTS
-════════════════════════════════════════════ */
+/* ════════════ EVENTS ════════════ */
+const Menu = {
+  el: document.getElementById('menu-dropdown'),
+  btn: document.getElementById('menu-btn'),
+  toggle() { const open = this.el.classList.toggle('show'); this.btn.setAttribute('aria-expanded', String(open)); },
+  close()  { this.el.classList.remove('show'); this.btn.setAttribute('aria-expanded', 'false'); }
+};
+
 document.getElementById('add').addEventListener('click', () => UI.addTransaction());
-['desc', 'amount'].forEach(id =>
-  document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') UI.addTransaction(); })
-);
-document.getElementById('menu-btn').addEventListener('click', () => {
-  document.getElementById('menu-dropdown').classList.toggle('show');
+document.getElementById('cancel-edit').addEventListener('click', () => { UI.clearForm(); UI.render(); });
+document.getElementById('desc').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); document.getElementById('amount').focus(); }
 });
+document.getElementById('amount').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); UI.addTransaction(); }
+});
+document.querySelectorAll('.seg-btn').forEach(b => b.addEventListener('click', () => {
+  document.getElementById('type').value = b.dataset.type;
+  UI.updateTypeSelect(b.dataset.type);
+}));
+Menu.btn.addEventListener('click', () => Menu.toggle());
 document.addEventListener('click', e => {
-  if (!e.target.closest('.menu-container'))
-    document.getElementById('menu-dropdown').classList.remove('show');
-  if (_monthDropdownEl && !e.target.closest('.prev-months-wrap'))
-    _monthDropdownEl.classList.remove('show');
+  if (!e.target.closest('.menu-container')) Menu.close();
+  if (_monthDropdownEl && !e.target.closest('.prev-months-wrap')) _monthDropdownEl.classList.remove('show');
 });
 document.getElementById('file-input').addEventListener('change', e => {
   if (e.target.files[0]) FileManager.importFromTxt(e.target.files[0]);
   e.target.value = '';
-  document.getElementById('menu-dropdown').classList.remove('show');
+  Menu.close();
 });
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && STATE.editing) { UI.clearForm(); UI.render(); }
+  if (e.key !== 'Escape') return;
+  Menu.close();
+  if (_monthDropdownEl) _monthDropdownEl.classList.remove('show');
+  if (STATE.editing) { UI.clearForm(); UI.render(); }
 });
 
-/* ════════════════════════════════════════════
-   GUIDE TOUR
-════════════════════════════════════════════ */
+/* ════════════ GUIDE TOUR ════════════ */
 const Guide = {
   SEEN_KEY: 'salary-tracker-guide-seen',
   STEPS: [
-    { sel: 'header',    title: 'Welcome to myBalance €', body: 'Your personal finance tracker. Everything is stored locally in your browser — no account, no server, no data leaves your device.' },
-    { sel: '.form-card',title: 'Add a Transaction',       body: 'Type a description, enter an amount, choose Income or Expense, then tap Add. You can edit or delete any entry later.' },
-    { sel: '#summary',  title: 'Monthly Summary',         body: 'See your Income, Spent, Carried Over (balance rolled from previous months), and current Balance — shown in EUR and BGN.' },
-    { sel: '#months',   title: 'Transactions & Months',   body: 'All entries are grouped by month. Switch months with the pills above. Tap the pencil to edit or bin to delete any transaction.' },
-    { sel: '#menu-btn', title: 'Backup Your Data',        body: 'Use the ⋮ menu to Download a .txt backup of all your data, or Upload one to restore or merge it back in.' }
+    { sel: '.app-header', title: 'Welcome to myBalance €', body: 'Your personal finance tracker. Everything is stored locally in your browser — no account, no server, no data leaves your device.' },
+    { sel: '.form-card',  title: 'Add a Transaction',      body: 'Type a description, enter an amount, pick Income or Expense, then tap Add. You can edit or delete any entry later.' },
+    { sel: '#summary',    title: 'Monthly Summary',        body: 'See your Balance, Income, Spent, Carried Over (rolled from previous months) and how much of your money is already spent — in EUR and BGN.' },
+    { sel: '#months',     title: 'Transactions & Months',  body: 'Entries are grouped by month. Switch months with the pills above the list. Use the pencil to edit or the bin to delete.' },
+    { sel: '#menu-btn',   title: 'Backup Your Data',       body: 'Use the ⋮ menu to download a .txt backup of all your data, or upload one to restore or merge it back in.' }
   ],
   _step: 0,
   init() {
     document.getElementById('guide-btn').addEventListener('click', () => this.start());
     document.getElementById('guide-next').addEventListener('click', () => this.next());
     document.getElementById('guide-skip').addEventListener('click', () => this.finish());
+    window.addEventListener('resize', () => { if (this._open) this._show(this._step); });
     if (!localStorage.getItem(this.SEEN_KEY)) setTimeout(() => this.start(), 600);
   },
-  start() { this._step = 0; this._show(0); },
+  start() { this._step = 0; this._open = true; this._show(0); },
   _show(n) {
     const step = this.STEPS[n];
     const target = document.querySelector(step.sel);
     document.getElementById('guide-title').textContent   = step.title;
     document.getElementById('guide-body').textContent    = step.body;
-    document.getElementById('guide-counter').textContent = `${n+1} / ${this.STEPS.length}`;
-    document.getElementById('guide-next').textContent    = n === this.STEPS.length-1 ? 'Finish' : 'Next';
+    document.getElementById('guide-counter').textContent = `${n + 1} / ${this.STEPS.length}`;
+    document.getElementById('guide-next').textContent    = n === this.STEPS.length - 1 ? 'Finish' : 'Next';
 
     const hl = document.getElementById('guide-highlight');
     const tt = document.getElementById('guide-tooltip');
     hl.style.display = 'block';
     tt.style.display = 'block';
+    document.getElementById('guide-next').focus();
     if (!target) return;
 
-    target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    target.scrollIntoView({ block: 'nearest' });
     requestAnimationFrame(() => {
       const r = target.getBoundingClientRect();
       const pad = 6;
-      hl.style.cssText += `left:${r.left-pad}px;top:${r.top-pad}px;width:${r.width+pad*2}px;height:${r.height+pad*2}px;`;
+      Object.assign(hl.style, { left: `${r.left - pad}px`, top: `${r.top - pad}px`, width: `${r.width + pad * 2}px`, height: `${r.height + pad * 2}px` });
 
       const vw = window.innerWidth, vh = window.innerHeight;
-      const maxW = Math.min(320, vw-32);
+      const maxW = Math.min(340, vw - 32);
+      const th = tt.offsetHeight || 170;
       let top  = r.bottom + pad + 12;
       let left = r.left;
-      if (top + 160 > vh - 16) top = Math.max(16, r.top - pad - 12 - 160);
+      if (top + th > vh - 16) top = r.top - pad - 12 - th;
+      if (top < 16) top = Math.max(16, vh - th - 16);   // target taller than viewport: pin to bottom
       if (left + maxW > vw - 16) left = vw - maxW - 16;
       if (left < 16) left = 16;
-      tt.style.top = top + 'px'; tt.style.left = left + 'px'; tt.style.maxWidth = maxW + 'px';
+      Object.assign(tt.style, { top: `${top}px`, left: `${left}px`, maxWidth: `${maxW}px` });
     });
   },
   next() { this._step++; this._step >= this.STEPS.length ? this.finish() : this._show(this._step); },
   finish() {
+    this._open = false;
     document.getElementById('guide-highlight').style.display = 'none';
     document.getElementById('guide-tooltip').style.display   = 'none';
     localStorage.setItem(this.SEEN_KEY, '1');
   }
 };
 
-/* ════════════════════════════════════════════
-   BOOT
-════════════════════════════════════════════ */
+/* ════════════ BOOT ════════════ */
 Theme.init();
 UI.updateTypeSelect('income');
 UI.render();
 Guide.init();
 
-/* Live clock */
+/* Live clock — shorter on phones */
 (function tick() {
   const el = document.getElementById('live-date');
-  if (el) el.textContent = new Date().toLocaleString('en-GB', {
-    weekday:'short', day:'2-digit', month:'short', year:'numeric',
-    hour:'2-digit', minute:'2-digit', second:'2-digit', hour12: false
-  });
+  if (el) {
+    const now = new Date();
+    const full  = now.toLocaleString('en-GB', { weekday:'short', day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12: false });
+    const short = now.toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', hour12: false });
+    el.innerHTML = `<span class="full">${full}</span><span class="short">${short}</span>`;
+  }
   setTimeout(tick, 1000);
 })();
 </script>
