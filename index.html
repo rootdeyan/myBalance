@@ -9,8 +9,8 @@
   <title>RTDN | myBalance €</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%236c63ff'/><path d='M70 20 Q40 20 30 50 Q40 80 70 80' fill='none' stroke='white' stroke-width='12' stroke-linecap='round'/><line x1='28' y1='40' x2='68' y2='40' stroke='white' stroke-width='12' stroke-linecap='round'/><line x1='28' y1='60' x2='68' y2='60' stroke='white' stroke-width='12' stroke-linecap='round'/></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 56 56'><defs><linearGradient id='g' x1='0' y1='1' x2='0' y2='0'><stop offset='0' stop-color='%235b3df5'/><stop offset='1' stop-color='%2300d68f'/></linearGradient></defs><rect width='56' height='56' rx='16' fill='%23131b2a'/><rect x='13' y='32' width='8' height='14' rx='3' fill='url(%23g)'/><rect x='24' y='22' width='8' height='24' rx='3' fill='url(%23g)'/><rect x='35' y='10' width='8' height='36' rx='3' fill='url(%23g)'/></svg>">
   <style>
     /* ══════════ TOKENS ══════════ */
     :root {
@@ -49,6 +49,12 @@
 
       --tap: 44px;
       --gutter: 16px;
+
+      --ease-out:    cubic-bezier(.22,1,.36,1);
+      --ease-spring: cubic-bezier(.34,1.56,.64,1);
+      --hairline:    inset 0 1px 0 rgba(255,255,255,0.06);
+      --edge:        linear-gradient(135deg, rgba(124,116,255,0.55), rgba(255,255,255,0.06) 38%, rgba(255,255,255,0.04) 62%, rgba(0,214,143,0.4));
+      --dots:        rgba(255,255,255,0.035);
     }
 
     [data-theme="light"] {
@@ -75,6 +81,9 @@
       --shadow-sm:   0 1px 3px rgba(15,23,42,0.06), 0 2px 12px rgba(15,23,42,0.05);
       --shadow:      0 6px 30px rgba(15,23,42,0.08);
       --shadow-lg:   0 16px 60px rgba(15,23,42,0.16);
+      --hairline:    inset 0 1px 0 rgba(255,255,255,0.9);
+      --edge:        linear-gradient(135deg, rgba(80,70,228,0.45), rgba(15,23,42,0.06) 38%, rgba(15,23,42,0.05) 62%, rgba(0,135,90,0.35));
+      --dots:        rgba(15,23,42,0.05);
     }
 
     /* ══════════ BASE ══════════ */
@@ -92,9 +101,25 @@
       -webkit-font-smoothing: antialiased;
       font-variant-numeric: tabular-nums;
     }
-    body::before {
+    /* Slow drifting aurora + faint dot grid behind everything */
+    body::after {
       content: '';
       position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image: radial-gradient(var(--dots) 1px, transparent 1px);
+      background-size: 22px 22px;
+      -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 75%);
+              mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 75%);
+    }
+    @keyframes aurora {
+      0%   { transform: translate3d(0,0,0) scale(1); }
+      50%  { transform: translate3d(-4%,3%,0) scale(1.08); }
+      100% { transform: translate3d(3%,-2%,0) scale(1.04); }
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: -12%; z-index: 0; pointer-events: none;
+      animation: aurora 26s ease-in-out infinite alternate;
+      will-change: transform;
       background:
         radial-gradient(ellipse 60% 40% at 15% 5%,  rgba(124,116,255,0.09) 0%, transparent 65%),
         radial-gradient(ellipse 50% 35% at 85% 85%, rgba(0,214,143,0.06) 0%, transparent 65%),
@@ -128,20 +153,45 @@
       display: flex; justify-content: space-between; align-items: center;
       gap: 12px; margin-bottom: 18px; padding-top: 4px;
     }
-    .header-brand { min-width: 0; }
-    .header-brand h1 {
-      font-size: clamp(1.15rem, 4.5vw, 1.5rem);
-      font-weight: 700; letter-spacing: -0.3px; line-height: 1.2;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      background: linear-gradient(135deg, #a5b4fc 0%, #c4b5fd 60%, #f0abfc 100%);
+    .header-brand { min-width: 0; display: flex; align-items: center; gap: 12px; }
+    .brand-mark {
+      flex-shrink: 0; width: 46px; height: 46px;
+      filter: drop-shadow(0 6px 16px rgba(91,61,245,0.35));
+    }
+    .brand-mark .bar {
+      transform-box: fill-box; transform-origin: 50% 100%;
+      animation: barUp .9s var(--ease-spring) both;
+    }
+    .brand-mark .b2 { animation-delay: .12s; }
+    .brand-mark .b3 { animation-delay: .24s; }
+    @keyframes barUp { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+    .brand-text { min-width: 0; }
+    .brand-name {
+      font-size: clamp(1.3rem, 5vw, 1.65rem);
+      font-weight: 700; letter-spacing: -0.6px; line-height: 1.1;
+      white-space: nowrap;
+    }
+    .brand-word {
+      background: linear-gradient(180deg, #ffffff 20%, #c9c2ff 100%);
       -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
     }
-    [data-theme="light"] .header-brand h1 { background-image: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
+    [data-theme="light"] .brand-word { background-image: linear-gradient(180deg, #0d1626 30%, #4b3fd6 100%); }
+    .brand-euro { color: var(--income); margin-left: 0.2em; }
     .live-date {
+      display: flex; align-items: center; gap: 8px;
       font-family: 'Roboto Mono', monospace; font-size: 0.75rem;
-      color: var(--text2); margin-top: 4px; letter-spacing: 0.2px;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      color: var(--text2); margin-top: 5px; letter-spacing: 0.2px;
+      white-space: nowrap; overflow: hidden;
     }
+    .brand-tag {
+      font-family: 'Roboto', sans-serif; font-weight: 700; font-size: 0.68rem;
+      letter-spacing: 2.5px; color: var(--text3);
+    }
+    .live-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--income); flex-shrink: 0;
+      box-shadow: 0 0 0 0 var(--income-glow); animation: livePulse 2s ease-out infinite;
+    }
+    @keyframes livePulse { 0% { box-shadow: 0 0 0 0 var(--income-glow); } 70%,100% { box-shadow: 0 0 0 7px transparent; } }
     .header-actions { display: flex; gap: 8px; flex-shrink: 0; }
 
     .icon-btn {
@@ -219,8 +269,21 @@
       transition: background .2s, color .2s;
       -webkit-tap-highlight-color: transparent;
     }
-    .seg-btn[aria-checked="true"][data-type="income"]  { background: var(--income-dim);  color: var(--income);  box-shadow: inset 0 0 0 1px var(--income); }
-    .seg-btn[aria-checked="true"][data-type="expense"] { background: var(--expense-dim); color: var(--expense); box-shadow: inset 0 0 0 1px var(--expense); }
+    /* Sliding pill behind the active option */
+    .seg { position: relative; }
+    .seg::before {
+      content: ''; position: absolute; top: 4px; bottom: 4px; left: 4px;
+      width: calc(50% - 6px); border-radius: 7px;
+      background: var(--income-dim); box-shadow: inset 0 0 0 1px var(--income);
+      transition: transform .45s var(--ease-spring), background .3s, box-shadow .3s;
+    }
+    .seg[data-type="expense"]::before {
+      transform: translateX(calc(100% + 4px));
+      background: var(--expense-dim); box-shadow: inset 0 0 0 1px var(--expense);
+    }
+    .seg-btn { position: relative; z-index: 1; }
+    .seg-btn[aria-checked="true"][data-type="income"]  { color: var(--income); }
+    .seg-btn[aria-checked="true"][data-type="expense"] { color: var(--expense); }
 
     .btn-row { display: flex; gap: 10px; }
     .btn-primary {
@@ -368,9 +431,7 @@
       background: var(--surface); border: 1px solid var(--border);
       border-radius: var(--radius-xl); overflow: hidden;
       box-shadow: var(--shadow);
-      animation: fadeUp .3s ease;
     }
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
     .carry-banner {
       display: flex; align-items: center; justify-content: space-between; gap: 12px;
@@ -469,10 +530,78 @@
     #guide-next { background: var(--primary); border: none; color: var(--on-primary); }
     #guide-counter { flex: 1; text-align: center; font-size: 0.8rem; color: var(--text2); }
 
+    /* ══════════ PREMIUM SURFACES ══════════ */
+    .form-card, .stat-card, .spend-row, .month-card {
+      -webkit-backdrop-filter: blur(14px) saturate(140%);
+              backdrop-filter: blur(14px) saturate(140%);
+    }
+    .stat-card, .spend-row, .month-card { box-shadow: var(--hairline), var(--shadow-sm); }
+    .month-card { box-shadow: var(--hairline), var(--shadow); }
+
+    /* Gradient hairline edge on the hero surfaces */
+    .form-card, .balance-card, .balance-neg {
+      border: 1px solid transparent;
+      background: linear-gradient(var(--surface), var(--surface)) padding-box, var(--edge) border-box;
+    }
+    .form-card { box-shadow: var(--hairline), var(--shadow); }
+    .form-card.editing { box-shadow: 0 0 0 3px var(--primary-dim), var(--shadow); }
+
+    /* Balance is the hero card: soft colored glow from the top-left corner */
+    .balance-card, .balance-neg { padding-top: 16px; padding-bottom: 16px; }
+    .balance-card {
+      background:
+        radial-gradient(120% 140% at 0% 0%, var(--primary-dim), transparent 55%) padding-box,
+        linear-gradient(var(--surface), var(--surface)) padding-box,
+        var(--edge) border-box;
+    }
+    .balance-neg {
+      background:
+        radial-gradient(120% 140% at 0% 0%, var(--expense-dim), transparent 55%) padding-box,
+        linear-gradient(var(--surface), var(--surface)) padding-box,
+        var(--edge) border-box;
+    }
+    .stat-card { transition: transform .35s var(--ease-out), box-shadow .35s var(--ease-out); }
+
+    /* Primary button: light sweep on hover, soft press */
+    .btn-primary { position: relative; overflow: hidden; isolation: isolate; }
+    .btn-primary::after {
+      content: ''; position: absolute; inset: 0; z-index: -1;
+      background: linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.28) 50%, transparent 70%);
+      transform: translateX(-120%);
+    }
+    .btn-primary > * { position: relative; }
+    .btn-primary:active { transform: scale(0.97); transition-duration: .08s; }
+
+    /* ══════════ MOTION ══════════ */
+    @keyframes rise   { from { opacity: 0; transform: translateY(18px) scale(.985); } to { opacity: 1; transform: none; } }
+    @keyframes rowIn  { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: none; } }
+    @keyframes newRow { 0% { background: var(--primary-dim); } 100% { background: transparent; } }
+    @keyframes spinIn { from { transform: rotate(-120deg) scale(.4); opacity: 0; } to { transform: none; opacity: 1; } }
+
+    /* Page load: sections rise in sequence */
+    .app-header, .form-card, #summary, .main { animation: rise .8s var(--ease-out) backwards; }
+    .form-card { animation-delay: .08s; }
+    #summary   { animation-delay: .16s; }
+    .main      { animation-delay: .24s; }
+
+    /* First render and month switch: cards and rows cascade in */
+    .enter .stat-card, .enter .spend-row { animation: rise .7s var(--ease-out) backwards; animation-delay: calc(var(--i, 0) * 70ms + 120ms); }
+    .enter .month-card { animation: rise .7s var(--ease-out) backwards; }
+    .enter .tx-row { animation: rowIn .5s var(--ease-out) backwards; animation-delay: calc(min(var(--i, 0), 12) * 40ms + 150ms); }
+    .tx-row.tx-new { animation: rowIn .5s var(--ease-out) backwards, newRow 1.8s ease-out .3s; }
+
+    #theme-toggle svg { animation: spinIn .55s var(--ease-spring); }
+    .ring-fill { transition: stroke-dasharray 1.2s var(--ease-out) .25s; }
+
     /* ══════════ HOVER (mouse only — no sticky hover on touch) ══════════ */
     @media (hover: hover) {
       .icon-btn:hover { background: var(--primary-dim); border-color: var(--primary); color: var(--primary); }
-      .btn-primary:hover { filter: brightness(1.08); box-shadow: 0 6px 24px rgba(108,99,255,0.45); }
+      .btn-primary:hover { filter: brightness(1.08); box-shadow: 0 8px 28px rgba(108,99,255,0.5); transform: translateY(-1px); }
+      .btn-primary:hover::after { transform: translateX(120%); transition: transform .8s var(--ease-out); }
+      .stat-card:hover { transform: translateY(-3px); box-shadow: var(--hairline), var(--shadow); }
+      .brand-mark:hover .bar { animation: barUp .7s var(--ease-spring) both; }
+      .brand-mark:hover .b2 { animation-delay: .08s; }
+      .brand-mark:hover .b3 { animation-delay: .16s; }
       .btn-ghost:hover, .menu-btn-icon:hover { border-color: var(--primary); color: var(--primary); }
       .menu-item:hover, .prev-item:hover { background: var(--primary-dim); color: var(--primary); }
       .month-pill:not(.active):hover, .prev-months-btn:hover { border-color: var(--primary); color: var(--primary); }
@@ -546,8 +675,20 @@
   <!-- HEADER -->
   <header class="app-header">
     <div class="header-brand">
-      <h1>RTDN | myBalance €</h1>
-      <div class="live-date" id="live-date"></div>
+      <svg class="brand-mark" viewBox="0 0 56 56" aria-hidden="true">
+        <defs>
+          <linearGradient id="bm-bar" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#5b3df5"/><stop offset="1" stop-color="#00d68f"/></linearGradient>
+          <linearGradient id="bm-bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1c2538"/><stop offset="1" stop-color="#0c111c"/></linearGradient>
+        </defs>
+        <rect x=".5" y=".5" width="55" height="55" rx="16" fill="url(#bm-bg)" stroke="rgba(255,255,255,.14)"/>
+        <rect class="bar b1" x="13" y="32" width="8" height="14" rx="3" fill="url(#bm-bar)"/>
+        <rect class="bar b2" x="24" y="22" width="8" height="24" rx="3" fill="url(#bm-bar)"/>
+        <rect class="bar b3" x="35" y="10" width="8" height="36" rx="3" fill="url(#bm-bar)"/>
+      </svg>
+      <div class="brand-text">
+        <h1 class="brand-name" aria-label="RTDN myBalance €"><span class="brand-word">myBalance</span><span class="brand-euro">€</span></h1>
+        <div class="live-date"><span class="brand-tag">RTDN</span><span class="live-dot" aria-hidden="true"></span><span id="live-date"></span></div>
+      </div>
     </div>
     <div class="header-actions">
       <button class="icon-btn" id="auto-theme-btn" aria-label="Auto theme" title="Auto theme: follows device">
@@ -832,6 +973,9 @@ const UI = {
     if (STATE.selectedMonth && STATE.selectedMonth !== realCk) {
       DataManager.refreshCarry(STATE.selectedMonth);
     }
+    // Cascade-in only on first load and month switch, not on every save
+    const enter = this._enter; this._enter = false;
+    ['summary', 'months'].forEach(id => document.getElementById(id).classList.toggle('enter', enter));
     this.renderMonths();   // creates the current month if missing, so run before summary
     this.renderSummary();
     const editing = !!STATE.editing;
@@ -851,25 +995,27 @@ const UI = {
     const { carry, income, expense } = cm;
     const balance = carry + income - expense;
     const balCls = balance < 0 ? 'balance-neg' : 'balance-card';
-
-    const carryHTML = carry !== 0 ? `
-      <div class="stat-card carry-card">
-        <div class="stat-label">Carried Over</div>
-        <div class="stat-eur">${carry >= 0 ? '+' : ''}${carry.toFixed(2)} €</div>
-        <div class="stat-bgn">≈ ${Formatter.convertToBGN(Math.abs(carry))} BGN</div>
-      </div>` : '';
     const balSpan = carry === 0 ? ' full-width' : '';
+
+    // sign: '+' / '-' fixed, 'auto' follows the value
+    let i = 0;
+    const card = (cls, label, key, v, sign) => `
+      <div class="stat-card ${cls}" style="--i:${i++}">
+        <div class="stat-label">${label}</div>
+        <div class="stat-eur" data-count="${v}" data-key="${key}" data-sign="${sign}">${UI.money(v, sign)}</div>
+        <div class="stat-bgn">≈ ${Formatter.convertToBGN(Math.abs(v))} BGN</div>
+      </div>`;
 
     // Share of available money (income + positive carry) already spent
     const available = income + Math.max(carry, 0);
     const pct = available > 0 ? Math.min(100, Math.round(expense / available * 100)) : (expense > 0 ? 100 : 0);
     const ringColor = pct < 60 ? 'var(--income)' : pct < 85 ? 'var(--carry)' : 'var(--expense)';
     const spendHTML = (available > 0 || expense > 0) ? `
-      <div class="spend-row">
+      <div class="spend-row" style="--i:4">
         <div class="ring-wrap" role="img" aria-label="${pct}% of available money spent">
           <svg class="ring-svg" viewBox="0 0 36 36" aria-hidden="true">
             <circle class="ring-track" cx="18" cy="18" r="15.915"/>
-            <circle class="ring-fill" cx="18" cy="18" r="15.915" stroke="${ringColor}" stroke-dasharray="${pct} 100"/>
+            <circle class="ring-fill" cx="18" cy="18" r="15.915" stroke="${ringColor}" style="stroke-dasharray:${this._lastPct ?? 0} 100" data-pct="${pct}"/>
           </svg>
           <span class="ring-label">${pct}%</span>
         </div>
@@ -879,30 +1025,48 @@ const UI = {
         </div>
       </div>` : '';
 
-    document.getElementById('summary').innerHTML = `
+    const el = document.getElementById('summary');
+    el.innerHTML = `
       <div class="summary-head">
         <h2 class="section-title">Summary</h2>
         <span class="summary-month">${Formatter.monthLabel(ck)}</span>
       </div>
       <div class="summary-panel">
-        <div class="stat-card ${balCls}${balSpan}">
-          <div class="stat-label">Balance</div>
-          <div class="stat-eur">${balance >= 0 ? '+' : ''}${balance.toFixed(2)} €</div>
-          <div class="stat-bgn">≈ ${Formatter.convertToBGN(Math.abs(balance))} BGN</div>
-        </div>
-        <div class="stat-card income-card">
-          <div class="stat-label">Income</div>
-          <div class="stat-eur">+${income.toFixed(2)} €</div>
-          <div class="stat-bgn">≈ ${Formatter.convertToBGN(income)} BGN</div>
-        </div>
-        <div class="stat-card expense-card">
-          <div class="stat-label">Spent</div>
-          <div class="stat-eur">-${expense.toFixed(2)} €</div>
-          <div class="stat-bgn">≈ ${Formatter.convertToBGN(expense)} BGN</div>
-        </div>
-        ${carryHTML}
+        ${card(balCls + balSpan, 'Balance', 'bal', balance, 'auto')}
+        ${card('income-card', 'Income', 'inc', income, '+')}
+        ${card('expense-card', 'Spent', 'exp', expense, '-')}
+        ${carry !== 0 ? card('carry-card', 'Carried Over', 'car', carry, 'auto') : ''}
         ${spendHTML}
       </div>`;
+
+    this.animateNumbers(el);
+    const ring = el.querySelector('.ring-fill');
+    if (ring) setTimeout(() => { ring.style.strokeDasharray = `${pct} 100`; }, 30);
+    this._lastPct = pct;
+  },
+
+  money(v, sign) {
+    const s = sign === 'auto' ? (v < 0 ? '-' : '+') : sign;
+    return `${s}${Math.abs(v).toFixed(2)} €`;
+  },
+
+  _prev: {},
+  /* Count each figure up from its last shown value (or 0 on first load) */
+  animateNumbers(root) {
+    const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    root.querySelectorAll('[data-count]').forEach(el => {
+      const to = parseFloat(el.dataset.count), key = el.dataset.key, sign = el.dataset.sign;
+      const from = this._prev[key] ?? 0;
+      this._prev[key] = to;
+      if (still || from === to) { el.textContent = this.money(to, sign); return; }
+      const t0 = performance.now(), dur = 900;
+      const step = now => {
+        const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 4);
+        el.textContent = this.money(from + (to - from) * e, sign);
+        if (p < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    });
   },
 
   renderMonths() {
@@ -1021,7 +1185,8 @@ const UI = {
     } else {
       data.tx.forEach((t, i) => {
         const row = document.createElement('div');
-        row.className = `tx-row ${t.type}-row`;
+        row.className = `tx-row ${t.type}-row${i === 0 && this._flashNew && displayKey === realCk ? ' tx-new' : ''}`;
+        row.style.setProperty('--i', i);
         const desc = this.esc(t.desc);
         row.innerHTML = `
           <div class="tx-main">
@@ -1040,12 +1205,15 @@ const UI = {
       });
     }
 
+    this._flashNew = false;
     card.appendChild(list);
     c.appendChild(card);
   },
 
+  _enter: true,
   switchMonth(key) {
     STATE.selectedMonth = key;
+    this._enter = true;
     this.render();
   },
 
@@ -1081,6 +1249,7 @@ const UI = {
   },
 
   updateTypeSelect(type) {
+    document.querySelector('.seg').dataset.type = type;
     document.querySelectorAll('.seg-btn').forEach(b =>
       b.setAttribute('aria-checked', String(b.dataset.type === type)));
   },
@@ -1093,10 +1262,15 @@ const UI = {
     const type = document.getElementById('type').value;
     if (!desc) { descEl.focus(); DataManager.showIndicator('Enter a description'); return; }
     if (!amt)  { amtEl.focus();  DataManager.showIndicator('Enter an amount'); return; }
-    const ok = STATE.editing
-      ? DataManager.updateTransaction(STATE.editing.monthKey, STATE.editing.idx, desc, amt, type)
-      : DataManager.addTransaction(desc, amt, type);
-    if (ok) { this.clearForm(); this.render(); }
+    const isNew = !STATE.editing;
+    const ok = isNew
+      ? DataManager.addTransaction(desc, amt, type)
+      : DataManager.updateTransaction(STATE.editing.monthKey, STATE.editing.idx, desc, amt, type);
+    if (ok) {
+      // New entries always land in the current month, so show it and highlight the row
+      if (isNew) { this._flashNew = true; if (STATE.selectedMonth) { STATE.selectedMonth = null; this._enter = true; } }
+      this.clearForm(); this.render();
+    }
   }
 };
 
@@ -1375,7 +1549,7 @@ Guide.init();
   if (el) {
     const now = new Date();
     const full  = now.toLocaleString('en-GB', { weekday:'short', day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12: false });
-    const short = now.toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', hour12: false });
+    const short = now.toLocaleString('en-GB', { hour:'2-digit', minute:'2-digit', hour12: false });
     el.innerHTML = `<span class="full">${full}</span><span class="short">${short}</span>`;
   }
   setTimeout(tick, 1000);

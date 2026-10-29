@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="brand/mybalance-logo-dark.svg">
+    <img src="brand/mybalance-logo-light.svg" alt="RTDN myBalance €" width="420">
+  </picture>
+</p>
+
 # Salary Tracker - Optimized Version
 
 ## 🎯 Key Improvements Implemented

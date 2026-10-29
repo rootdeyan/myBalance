@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56" width="56" height="56" role="img" aria-label="RTDN myBalance €"><defs><linearGradient id="bar" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#5b3df5"/><stop offset="1" stop-color="#00d68f"/></linearGradient>
+<linearGradient id="tile" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1c2538"/><stop offset="1" stop-color="#0c111c"/></linearGradient><linearGradient id="word" x1="0" y1="0" x2="0" y2="1"><stop offset=".2" stop-color="#ffffff"/><stop offset="1" stop-color="#c9c2ff"/></linearGradient></defs><g transform="translate(0 0) scale(1.0)">
+<rect x=".5" y=".5" width="55" height="55" rx="16" fill="url(#tile)" stroke="#ffffff" stroke-opacity=".14"/>
+<rect x="13" y="32" width="8" height="14" rx="3" fill="url(#bar)"/>
+<rect x="24" y="22" width="8" height="24" rx="3" fill="url(#bar)"/>
+<rect x="35" y="10" width="8" height="36" rx="3" fill="url(#bar)"/></g></svg>
