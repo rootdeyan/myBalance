@@ -300,16 +300,27 @@
     .day-label span { font-family: 'Roboto Mono', monospace; font-weight: 500; letter-spacing: 0; text-transform: none; }
     .tx-group {
       border-radius: var(--r-lg); overflow: hidden;
-      background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+      background: var(--surface-solid); border: 1px solid var(--border); box-shadow: var(--shadow-sm);
     }
+    .tx-item { position: relative; overflow: hidden; }
+    .tx-item + .tx-item::before { content: ''; position: absolute; top: 0; left: 68px; right: 0; height: 1px; background: var(--border); z-index: 2; }
+    /* red layer revealed when an entry is swiped left */
+    .tx-del-bg {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+      padding-right: 22px; font-weight: 700; font-size: .9rem; color: #fff;
+      background: linear-gradient(90deg, #ff8aa1, #e8364f);
+    }
+    .tx-del-bg svg { transition: transform .3s var(--ease-spring); }
+    .tx-item.armed .tx-del-bg svg { transform: scale(1.25) rotate(-8deg); }
     .tx-row {
-      width: 100%; min-height: 66px; padding: 11px 14px;
+      width: 100%; min-height: 66px; padding: 11px 14px; background: var(--surface-solid);
+      touch-action: pan-y;
       display: grid; grid-template-columns: 42px minmax(0,1fr) auto; align-items: center; gap: 12px;
       text-align: left; position: relative;
-      transition: background-color .2s, transform .2s var(--ease-out);
+      transition: background-color .2s, transform .4s var(--ease-spring);
     }
-    .tx-row + .tx-row::before { content: ''; position: absolute; top: 0; left: 68px; right: 0; height: 1px; background: var(--border); }
-    .tx-row:active { background: var(--card-hover); transform: scale(.985); }
+    .tx-row.dragging { transition: none; }
+    .tx-row:active { background: var(--card); }
     .tx-ico { width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center; }
     .tx-row.income  .tx-ico { background: var(--income-dim);  color: var(--income); }
     .tx-row.expense .tx-ico { background: var(--expense-dim); color: var(--expense); }
@@ -447,7 +458,9 @@
     .sheet.closing { animation: sheetDown .3s cubic-bezier(.4,0,1,1) forwards; }
     .sheet::backdrop { background: rgba(3,5,10,.55); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px); animation: fadeIn .35s ease; }
     .sheet.closing::backdrop { animation: fadeOut .3s ease forwards; }
-    .sheet-inner { padding: 0 20px calc(20px + env(safe-area-inset-bottom)); }
+    .sheet-inner { --pad: 20px; padding: 0 var(--pad) calc(20px + env(safe-area-inset-bottom)); }
+    #tx-form .sheet-inner { padding-bottom: 0; }
+    .sheet input { scroll-margin-bottom: 96px; }
     .sheet-grab { touch-action: none; padding-top: 10px; cursor: grab; }
     .grabber { display: block; width: 42px; height: 5px; border-radius: 99px; background: var(--border-hi); margin: 0 auto; }
     .sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0 14px; }
@@ -520,6 +533,40 @@
     .chip:active { transform: scale(.92); }
     .form-error { min-height: 1.3em; margin-top: 10px; font-size: .84rem; font-weight: 500; color: var(--expense); text-align: center; }
     .sheet-actions { display: flex; gap: 10px; margin-top: 6px; }
+    #tx-form .sheet-actions {
+      position: sticky; bottom: 0; z-index: 2;
+      margin: 6px calc(-1 * var(--pad)) 0; padding: 14px var(--pad) calc(16px + env(safe-area-inset-bottom));
+      background: linear-gradient(transparent, var(--surface-solid) 14px);
+    }
+    .btn-ghost { flex: 1; height: 54px; border-radius: 16px; font-weight: 700; color: var(--text); background: var(--card); transition: transform .15s; }
+    .btn-ghost:active { transform: scale(.96); }
+    .btn-danger.wide { flex: 1; justify-content: center; }
+
+    /* entry details + confirm */
+    .act-card { display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: var(--r-lg); background: var(--card); }
+    .act-card .tx-ico { flex: none; }
+    .act-card.income .tx-ico { background: var(--income-dim); color: var(--income); }
+    .act-card.expense .tx-ico { background: var(--expense-dim); color: var(--expense); }
+    .act-main { flex: 1; min-width: 0; }
+    .act-desc { font-size: 1.02rem; font-weight: 700; overflow-wrap: anywhere; }
+    .act-date { font-size: .8rem; color: var(--text2); margin-top: 3px; }
+    .act-amt { text-align: right; font-weight: 700; font-size: 1.05rem; white-space: nowrap; }
+    .act-card.income .act-amt { color: var(--income); }
+    .act-amt small { display: block; font-family: 'Roboto Mono', monospace; font-weight: 400; font-size: .72rem; color: var(--text2); margin-top: 3px; }
+    .act-list { display: grid; gap: 10px; margin-top: 14px; }
+    .act-btn {
+      height: 56px; border-radius: 16px; display: flex; align-items: center; gap: 12px; padding: 0 18px;
+      font-size: 1rem; font-weight: 600; background: var(--card); transition: transform .15s, background-color .2s;
+    }
+    .act-btn:active { transform: scale(.97); }
+    .act-btn.danger { color: var(--expense); background: var(--expense-dim); }
+    .act-btn.edit svg { color: var(--primary); }
+    .confirm-ico {
+      width: 60px; height: 60px; margin: 6px auto 14px; border-radius: 20px; display: grid; place-items: center;
+      background: var(--expense-dim); color: var(--expense); animation: chipPop .5s var(--ease-spring);
+    }
+    .confirm-title { text-align: center; font-size: 1.2rem; font-weight: 700; }
+    .confirm-body { text-align: center; color: var(--text2); font-size: .92rem; line-height: 1.5; margin: 8px 0 20px; overflow-wrap: anywhere; }
 
     .kb-open .sheet-inner { padding-bottom: 14px; }
     .kb-open .sheet-head { padding: 6px 0 10px; }
@@ -531,6 +578,7 @@
     .kb-open .chips { margin-top: 8px; }
     .kb-open .form-error { min-height: 0; margin-top: 6px; }
     .kb-open .btn-primary, .kb-open .btn-danger { height: 50px; }
+    .kb-open #tx-form .sheet-actions { padding-top: 10px; padding-bottom: 10px; }
 
     /* settings */
     .set-label { font-size: .74rem; font-weight: 700; letter-spacing: .9px; text-transform: uppercase; color: var(--text2); margin: 4px 2px 10px; }
@@ -618,7 +666,8 @@
     .filtering .tx-day, .filtering .empty, .filtering .results { animation: rise .35s var(--ease-out) backwards; }
     .filtering .tx-day { animation-delay: calc(min(var(--i), 6) * 30ms); }
     .tx-row.tx-new { animation: flash 2s ease-out .35s backwards; }
-    .tx-row.leaving { animation: leave .26s cubic-bezier(.4,0,1,1) forwards; pointer-events: none; }
+    .tx-item.leaving { animation: leave .3s cubic-bezier(.4,0,1,1) forwards; pointer-events: none; }
+    .tx-item.leaving .tx-row { transform: translateX(-100%) !important; transition: transform .3s cubic-bezier(.4,0,1,1); }
     .shake { animation: shake .4s ease; }
 
     ::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
@@ -664,7 +713,7 @@
       .sheet[open] { animation: popIn .4s var(--ease-out); }
       .sheet.closing { animation: popOut .22s ease-in forwards; }
       .sheet-grab { display: none; }
-      .sheet-inner { padding: 8px 26px 24px; }
+      .sheet-inner { --pad: 26px; padding: 8px var(--pad) 24px; }
       .toast { bottom: 28px; }
     }
 
@@ -729,7 +778,7 @@
     <main class="main">
       <div class="list-head">
         <h2 class="section-title">Transactions</h2><span class="count" id="tx-count">0</span>
-        <span class="swipe-hint"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m8 7-5 5 5 5M16 7l5 5-5 5"/></svg>Swipe for months</span>
+        <span class="swipe-hint"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m8 7-5 5 5 5M16 7l5 5-5 5"/></svg>Swipe entry left to delete</span>
       </div>
       <div class="list-tools">
         <label class="search">
@@ -778,7 +827,7 @@
       <div class="amount-wrap">
         <label class="amount-field" id="amount-field">
           <span class="sr-only">Amount in euro</span>
-          <input id="amount" inputmode="decimal" placeholder="0.00" autocomplete="off" maxlength="10" enterkeyhint="next" autofocus>
+          <input id="amount" inputmode="decimal" placeholder="0.00" autocomplete="off" maxlength="10" enterkeyhint="next">
           <span class="cur" aria-hidden="true">€</span>
         </label>
         <div class="amount-bgn" id="amount-bgn">≈ 0.00 BGN</div>
@@ -793,13 +842,50 @@
 
       <div class="form-error" id="form-error" role="alert"></div>
       <div class="sheet-actions">
-        <button type="button" class="btn-danger" id="delete-btn" hidden>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Delete
-        </button>
         <button type="submit" class="btn-primary" id="add"><span id="add-label">Add transaction</span></button>
       </div>
     </div>
   </form>
+</dialog>
+
+<!-- ENTRY ACTIONS (tap on a transaction) -->
+<dialog class="sheet" id="act-sheet" aria-labelledby="act-title">
+  <div class="sheet-grab"><span class="grabber"></span></div>
+  <div class="sheet-inner">
+    <div class="sheet-head">
+      <h2 id="act-title">Transaction</h2>
+      <button type="button" class="icon-btn" data-close aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="act-card" id="act-card">
+      <span class="tx-ico" id="act-ico"></span>
+      <div class="act-main"><div class="act-desc" id="act-desc"></div><div class="act-date" id="act-date"></div></div>
+      <div class="act-amt" id="act-amt"></div>
+    </div>
+    <div class="act-list">
+      <button type="button" class="act-btn edit" id="act-edit">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Edit
+      </button>
+      <button type="button" class="act-btn danger" id="act-del">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Delete
+      </button>
+    </div>
+  </div>
+</dialog>
+
+<!-- CONFIRM -->
+<dialog class="sheet" id="confirm-sheet" aria-labelledby="confirm-title" aria-describedby="confirm-body">
+  <div class="sheet-grab"><span class="grabber"></span></div>
+  <div class="sheet-inner" style="padding-top:14px">
+    <div class="confirm-ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg></div>
+    <h2 class="confirm-title" id="confirm-title">Delete transaction?</h2>
+    <p class="confirm-body" id="confirm-body"></p>
+    <div class="sheet-actions">
+      <button type="button" class="btn-ghost" data-close>Cancel</button>
+      <button type="button" class="btn-danger wide" id="confirm-ok">Delete</button>
+    </div>
+  </div>
 </dialog>
 
 <!-- SETTINGS SHEET -->
@@ -1059,6 +1145,7 @@ const ICONS = {
   down: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 7 7 17M16 17H7V8"/></svg>`,
   carry:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>`,
   cal:  `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>`,
+  trash:`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`,
   search:`<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>`,
   plus: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>`,
   empty:`<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20M6 15h4"/></svg>`
@@ -1270,11 +1357,11 @@ const UI = {
           <div class="tx-group">`;
         g.items.forEach(i => {
           const t = data.tx[i], desc = this.esc(t.desc), sign = t.type === 'income' ? '+' : '−';
-          html += `<button type="button" class="tx-row ${t.type}${t.ts === this._flashTs ? ' tx-new' : ''}" data-k="${k}" data-i="${i}" aria-label="Edit ${desc}, ${sign}${t.amt.toFixed(2)} euro">
+          html += `<div class="tx-item"><div class="tx-del-bg" aria-hidden="true">${ICONS.trash}Delete</div><button type="button" class="tx-row ${t.type}${t.ts === this._flashTs ? ' tx-new' : ''}" data-k="${k}" data-i="${i}" aria-label="${desc}, ${sign}${t.amt.toFixed(2)} euro. Open to edit or delete">
             <span class="tx-ico">${t.type === 'income' ? ICONS.up : ICONS.down}</span>
             <span class="tx-main"><span class="tx-desc">${desc}</span><span class="tx-meta">${Formatter.time(t.ts)}</span></span>
             <span class="tx-amount"><span class="tx-eur">${sign}${Formatter.num(t.amt)} €</span><span class="tx-bgn">≈ ${Formatter.convertToBGN(t.amt)} BGN</span></span>
-          </button>`;
+          </button></div>`;
         });
         html += `</div></section>`;
       });
@@ -1312,6 +1399,8 @@ const UI = {
     this.clearForm();
     this.syncForm();
     Sheet.open($('tx-sheet'));
+    // keyboard only pops up by itself on desktop; on phones the user taps the amount
+    if (matchMedia('(pointer: fine)').matches) $('amount').focus();
   },
   startEdit(monthKey, idx) {
     const t = STATE.months[monthKey]?.tx[idx];
@@ -1323,11 +1412,35 @@ const UI = {
     this.syncForm();
     Sheet.open($('tx-sheet'));
   },
+  /* tap on an entry: show it with Edit / Delete */
+  openActions(k, i) {
+    const t = STATE.months[k]?.tx[i];
+    if (!t) return;
+    this._act = { k, i };
+    const sign = t.type === 'income' ? '+' : '−';
+    $('act-card').className = `act-card ${t.type}`;
+    $('act-ico').innerHTML = t.type === 'income' ? ICONS.up : ICONS.down;
+    $('act-desc').textContent = t.desc;
+    $('act-date').textContent = new Date(t.ts).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    $('act-amt').innerHTML = `${sign}${Formatter.num(t.amt)} €<small>≈ ${Formatter.convertToBGN(t.amt)} BGN</small>`;
+    Sheet.open($('act-sheet'));
+  },
+  /* ask first; on "no" the swiped row springs back */
+  async confirmDelete(k, i) {
+    const t = STATE.months[k]?.tx[i];
+    if (!t) return;
+    const ok = await Confirm.ask(`"${t.desc}" (${t.type === 'income' ? '+' : '−'}${Formatter.num(t.amt)} €) will be removed. You can undo right after.`);
+    if (ok) return this.removeTx(k, i);
+    const item = this.itemEl(k, i);
+    if (item) { item.classList.remove('armed'); item.querySelector('.tx-row').style.transform = ''; }
+  },
+  itemEl(k, i) {
+    return document.querySelector(`.tx-row[data-k="${CSS.escape(k)}"][data-i="${i}"]`)?.closest('.tx-item');
+  },
   syncForm() {
     const editing = !!STATE.editing;
     $('form-title').textContent = editing ? 'Edit transaction' : 'New transaction';
     $('add-label').textContent = editing ? 'Save changes' : 'Add transaction';
-    $('delete-btn').hidden = !editing;
     $('form-error').textContent = '';
     this.onAmountInput();
     this.renderSuggest();
@@ -1401,9 +1514,7 @@ const UI = {
   removeTx(k, i) {
     const m = STATE.months[k], t = m?.tx[i];
     if (!t) return;
-    STATE.editing = null;
-    Sheet.close($('tx-sheet'));
-    const row = document.querySelector(`.tx-row[data-k="${CSS.escape(k)}"][data-i="${i}"]`);
+    const row = this.itemEl(k, i);
     const go = () => {
       if (!DataManager.deleteTransaction(k, i)) return;
       buzz([10, 40, 10]);
@@ -1416,7 +1527,7 @@ const UI = {
         this.render();
       }});
     };
-    if (row && !still()) { setTimeout(() => row.classList.add('leaving'), 180); setTimeout(go, 460); } else go();
+    if (row && !still()) { row.classList.add('leaving'); setTimeout(go, 320); } else go();
   }
 };
 
@@ -1431,22 +1542,28 @@ const Sheet = {
   },
   close(d) {
     if (!d.open || d.classList.contains('closing')) return;
+    d.dispatchEvent(new Event('sheetclose'));   // fires right away, before the exit animation
     if (still()) { d.close(); return; }
     d.classList.add('closing');
-    const done = e => {
-      if (e.target !== d) return;   // ignore animations of children
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
       d.removeEventListener('animationend', done);
       d.classList.remove('closing');
       d.style.transform = '';
       d.close();
+      if (!document.querySelector('dialog[open]')) document.body.classList.remove('sheet-open');
     };
+    const done = e => { if (e.target === d) finish(); };   // ignore animations of children
     d.addEventListener('animationend', done);
+    setTimeout(finish, 450);   // fallback if animationend never fires (e.g. app sent to background)
   },
   init(d) {
     d.addEventListener('cancel', e => { e.preventDefault(); this.close(d); });
     d.addEventListener('click', e => { if (e.target === d) this.close(d); });   // backdrop tap
     d.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => this.close(d)));
-    d.addEventListener('close', () => document.body.classList.remove('sheet-open'));
+    d.addEventListener('close', () => { if (!document.querySelector('dialog[open]')) document.body.classList.remove('sheet-open'); });
 
     // drag the handle down to dismiss (bottom-sheet layout only)
     const grab = d.querySelector('.sheet-grab');
@@ -1643,7 +1760,25 @@ $('tx-form').addEventListener('submit', e => { e.preventDefault(); UI.addTransac
 $('amount').addEventListener('input', () => { UI.onAmountInput(); $('form-error').textContent = ''; });
 $('desc').addEventListener('input', () => { $('form-error').textContent = ''; });
 $('amount').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); $('desc').focus(); } });
-$('delete-btn').addEventListener('click', () => { const ed = STATE.editing; if (ed) UI.removeTx(ed.monthKey, ed.idx); });
+const actSheet = $('act-sheet');
+Sheet.init(actSheet);
+Sheet.init($('confirm-sheet'));
+$('act-edit').addEventListener('click', () => { const a = UI._act; Sheet.close(actSheet); UI.startEdit(a.k, a.i); });
+$('act-del').addEventListener('click', () => { const a = UI._act; Sheet.close(actSheet); UI.confirmDelete(a.k, a.i); });
+
+/* Confirm.ask(text) → Promise<boolean>; Cancel, backdrop, Esc or drag-down all mean "no" */
+const Confirm = {
+  d: $('confirm-sheet'),
+  ask(body) {
+    $('confirm-body').textContent = body;
+    return new Promise(res => {
+      let yes = false;
+      $('confirm-ok').onclick = () => { yes = true; buzz(10); Sheet.close(this.d); };
+      this.d.addEventListener('sheetclose', () => res(yes), { once: true });
+      Sheet.open(this.d);
+    });
+  }
+};
 document.querySelectorAll('#type-seg .seg-btn').forEach(b => b.addEventListener('click', () => {
   UI.updateTypeSelect(b.dataset.type);
   UI.renderSuggest();
@@ -1662,8 +1797,9 @@ $('months-nav').addEventListener('wheel', e => {
   if (nav.scrollWidth > nav.clientWidth && Math.abs(e.deltaY) > Math.abs(e.deltaX)) { nav.scrollLeft += e.deltaY; e.preventDefault(); }
 }, { passive: false });
 $('list').addEventListener('click', e => {
+  if (UI._swiped) return;   // a swipe just ended on this row
   const row = e.target.closest('.tx-row');
-  if (row) return UI.startEdit(row.dataset.k, +row.dataset.i);
+  if (row) return UI.openActions(row.dataset.k, +row.dataset.i);
   const chip = e.target.closest('.dchip');
   if (chip) { STATE.day = chip.dataset.day; buzz(5); return UI.refreshList(); }
   if (e.target.closest('[data-action="clear"]')) { UI.clearFilters(); return UI.refreshList(); }
@@ -1699,7 +1835,7 @@ $('guide-btn').addEventListener('click', () => { Sheet.close(setSheet); setTimeo
   zone.style.touchAction = 'pan-y';
   let x0 = null, y0 = 0, t0 = 0;
   zone.addEventListener('pointerdown', e => {
-    if (e.pointerType === 'mouse' || e.target.closest('.months, .days, .search')) return;
+    if (e.pointerType === 'mouse' || e.target.closest('.months, .days, .search, .tx-row')) return;
     x0 = e.clientX; y0 = e.clientY; t0 = Date.now();
   });
   zone.addEventListener('pointerup', e => {
@@ -1709,6 +1845,45 @@ $('guide-btn').addEventListener('click', () => { Sheet.close(setSheet); setTimeo
     if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.6 && Date.now() - t0 < 700) UI.stepMonth(dx < 0 ? 1 : -1);
   });
   zone.addEventListener('pointercancel', () => { x0 = null; });
+})();
+
+/* Swipe an entry right-to-left to delete it (asks first) */
+(() => {
+  const list = $('list');
+  let s = null;
+  const reset = row => { row.classList.remove('dragging'); row.style.transform = ''; row.parentElement.classList.remove('armed'); };
+  list.addEventListener('pointerdown', e => {
+    const row = e.target.closest('.tx-row');
+    if (!row || e.pointerType === 'mouse') return;
+    s = { row, x: e.clientX, y: e.clientY, dx: 0, locked: false, id: e.pointerId };
+  });
+  list.addEventListener('pointermove', e => {
+    if (!s || e.pointerId !== s.id) return;
+    const dx = e.clientX - s.x, dy = e.clientY - s.y;
+    if (!s.locked) {
+      if (Math.abs(dx) < 10) return;
+      if (Math.abs(dy) > Math.abs(dx) || dx > 0) { s = null; return; }   // scrolling, or a right swipe
+      s.locked = true;
+      try { s.row.setPointerCapture(e.pointerId); } catch {}
+      s.row.classList.add('dragging');
+    }
+    s.dx = Math.min(0, dx);
+    const w = s.row.offsetWidth, x = s.dx < -w * 0.35 ? -w * 0.35 + (s.dx + w * 0.35) * 0.35 : s.dx;   // rubber band
+    s.row.style.transform = `translateX(${x}px)`;
+    const armed = s.dx < -90;
+    if (armed !== s.row.parentElement.classList.contains('armed')) { s.row.parentElement.classList.toggle('armed', armed); if (armed) buzz(8); }
+  });
+  list.addEventListener('pointerup', e => {
+    if (!s || e.pointerId !== s.id) return;
+    const { row, dx, locked } = s;
+    s = null;
+    if (!locked) return;
+    UI._swiped = true; setTimeout(() => { UI._swiped = false; }, 60);
+    row.classList.remove('dragging');
+    if (dx < -90) { row.style.transform = 'translateX(-112px)'; UI.confirmDelete(row.dataset.k, +row.dataset.i); }
+    else reset(row);
+  });
+  list.addEventListener('pointercancel', () => { if (s) reset(s.row); s = null; });
 })();
 
 /* Arrow keys switch months on desktop */
@@ -1729,12 +1904,15 @@ onScroll();
 /* Keep sheets above the on-screen keyboard (iOS overlays it instead of resizing the page) */
 if (window.visualViewport) {
   const vv = visualViewport, root = document.documentElement;
+  let maxH = vv.height, lastW = innerWidth;
   const fit = () => {
+    if (innerWidth !== lastW) { lastW = innerWidth; maxH = vv.height; }   // rotation
+    maxH = Math.max(maxH, vv.height);
     const kb = Math.max(0, Math.round(innerHeight - vv.height - vv.offsetTop));
     root.style.setProperty('--kb', kb + 'px');
     root.style.setProperty('--vvh', Math.round(vv.height) + 'px');
     // Android resizes the page instead, so also treat a much shorter viewport as "keyboard open"
-    root.classList.toggle('kb-open', kb > 120 || vv.height < screen.height * 0.6);
+    root.classList.toggle('kb-open', kb > 120 || vv.height < maxH * 0.78);
   };
   vv.addEventListener('resize', fit);
   vv.addEventListener('scroll', fit);
@@ -1755,7 +1933,7 @@ const Guide = {
     { sel: '.topbar-in',   title: 'Welcome to myBalance €', body: 'Your personal finance tracker. Everything is stored locally in your browser — no account, no server, no data leaves your device.' },
     { sel: '#summary',     title: 'Your month at a glance', body: 'Balance, income, spending and how much of your money is already spent — in EUR and BGN.' },
     { sel: '#months-nav',  title: 'Switch months',          body: 'Tap a month here. On a phone you can also swipe left or right anywhere on the page.' },
-    { sel: '#list',        title: 'Your transactions',      body: 'Grouped by day, newest first. Tap any entry to edit or delete it — deletes can be undone.' },
+    { sel: '#list',        title: 'Your transactions',      body: 'Grouped by day, newest first. Tap an entry to edit or delete it, or swipe it left to delete. Deletes ask first and can be undone.' },
     { sel: '#fab, #new-btn', title: 'Add in seconds',       body: 'Tap + to add income or an expense. Your recent descriptions appear as one-tap shortcuts.' },
     { sel: '#settings-btn', title: 'Theme & backup',        body: 'Pick Auto, Light or Dark theme, and download or restore a .txt backup of all your data.' }
   ],
