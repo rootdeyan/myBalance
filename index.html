@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
   <meta name="description" content="Free personal salary tracker app. Manage monthly income, expenses, balances in EUR/BGN with secure client-side storage. No signup required.">
   <meta name="theme-color" id="theme-color" content="#080c14">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,7 +16,7 @@
     /* ══════════ TOKENS ══════════ */
     :root {
       --bg:          #070a12;
-      --surface:     rgba(20,27,42,0.72);
+      --surface:     rgba(18,25,40,0.94);
       --surface-solid:#111827;
       --card:        #182132;
       --card-hover:  rgba(255,255,255,0.045);
@@ -63,7 +63,7 @@
     }
     [data-theme="light"] {
       --bg:          #eef1f8;
-      --surface:     rgba(255,255,255,0.82);
+      --surface:     rgba(255,255,255,0.96);
       --surface-solid:#ffffff;
       --card:        #f3f5fb;
       --card-hover:  rgba(15,23,42,0.035);
@@ -100,7 +100,7 @@
     /* ══════════ BASE ══════════ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     [hidden] { display: none !important; }
-    html { -webkit-text-size-adjust: 100%; background: var(--bg); }
+    html { -webkit-text-size-adjust: 100%; background: var(--bg); touch-action: manipulation; }
     body {
       font-family: 'Roboto', system-ui, -apple-system, sans-serif;
       background: var(--bg); color: var(--text);
@@ -124,6 +124,7 @@
         radial-gradient(ellipse 50% 35% at 90% 80%, rgba(0,214,143,0.07), transparent 65%),
         radial-gradient(ellipse 35% 25% at 70% 30%, rgba(255,107,136,0.05), transparent 60%);
       animation: aurora 28s ease-in-out infinite alternate;
+      will-change: transform;
     }
     [data-theme="light"]::before {
       background:
@@ -194,7 +195,8 @@
     /* ══════════ MONTH STRIP ══════════ */
     .months {
       display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x proximity;
-      margin: 4px calc(-1 * var(--gutter)) 14px; padding: 4px var(--gutter);
+      /* extra vertical room so the active chip's glow isn't clipped by the scroller */
+      margin: -6px calc(-1 * var(--gutter)) -6px; padding: 10px var(--gutter) 20px;
       scrollbar-width: none;
       -webkit-mask-image: linear-gradient(90deg, transparent, #000 var(--gutter), #000 calc(100% - var(--gutter)), transparent);
               mask-image: linear-gradient(90deg, transparent, #000 var(--gutter), #000 calc(100% - var(--gutter)), transparent);
@@ -214,7 +216,7 @@
     .mchip.active {
       background: linear-gradient(140deg, var(--primary), var(--primary-2));
       border-color: transparent; color: var(--on-primary);
-      box-shadow: 0 8px 22px var(--primary-glow);
+      box-shadow: 0 6px 14px var(--primary-glow);
       animation: chipPop .45s var(--ease-spring);
     }
     .mchip.active small { color: rgba(255,255,255,.8); }
@@ -228,17 +230,7 @@
       box-shadow: var(--shadow), 0 20px 50px -20px var(--primary-glow);
     }
     .hero.neg { background: var(--hero-neg) padding-box, var(--edge) border-box; box-shadow: var(--shadow), 0 20px 50px -20px rgba(255,107,136,.35); }
-    /* faint growth-bars motif + a one-off light sweep */
-    .hero::before {
-      content: ''; position: absolute; right: -6px; bottom: -10px; z-index: -1;
-      width: 130px; height: 120px; opacity: .1;
-      background:
-        linear-gradient(currentColor, currentColor) 8px 70px / 26px 50px no-repeat,
-        linear-gradient(currentColor, currentColor) 48px 38px / 26px 82px no-repeat,
-        linear-gradient(currentColor, currentColor) 88px 0 / 26px 120px no-repeat;
-      color: var(--text);
-      -webkit-mask-image: linear-gradient(0deg, transparent, #000 70%); mask-image: linear-gradient(0deg, transparent, #000 70%);
-    }
+    /* one-off light sweep across the card */
     .hero::after {
       content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
       background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.14) 50%, transparent 65%);
@@ -278,7 +270,6 @@
       display: flex; align-items: center; gap: 11px; min-width: 0;
       padding: 13px 14px; border-radius: var(--r-lg);
       background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-sm);
-      -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
     }
     .stat-ico { width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center; }
     .stat.income .stat-ico { background: var(--income-dim); color: var(--income); }
@@ -310,7 +301,6 @@
     .tx-group {
       border-radius: var(--r-lg); overflow: hidden;
       background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-sm);
-      -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
     }
     .tx-row {
       width: 100%; min-height: 66px; padding: 11px 14px;
@@ -347,7 +337,44 @@
     }
     .empty-art { width: 64px; height: 64px; margin: 0 auto 14px; border-radius: 22px; display: grid; place-items: center; background: var(--primary-dim); color: var(--primary); animation: float 4s ease-in-out infinite; }
     .empty b { display: block; color: var(--text); font-size: 1rem; margin-bottom: 4px; }
-    .empty .btn-primary { margin: 18px auto 0; padding: 0 22px; height: 48px; flex: none; }
+    .empty p { font-size: .9rem; line-height: 1.5; }
+    .empty .btn-primary { display: flex; width: fit-content; margin: 18px auto 0; padding: 0 22px; height: 48px; flex: none; }
+
+    /* search + day filter */
+    .list-tools { display: flex; gap: 8px; margin-top: 12px; }
+    .search {
+      flex: 1; min-width: 0; height: 48px; display: flex; align-items: center; gap: 8px; padding: 0 6px 0 14px;
+      border-radius: 14px; background: var(--surface); border: 1.5px solid var(--border); color: var(--text2);
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .search:focus-within { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-dim); }
+    .search input {
+      flex: 1; min-width: 0; height: 100%; border: none; outline: none; background: transparent;
+      font: 400 16px 'Roboto', sans-serif; color: var(--text);   /* 16px stops iOS zooming on focus */
+    }
+    .search input::placeholder { color: var(--text2); }
+    .search input::-webkit-search-cancel-button { display: none; }
+    .search-clear { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; color: var(--text2); animation: chipIn .25s var(--ease-spring); }
+    .days { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin: 10px calc(-1 * var(--gutter)) 0; padding: 2px var(--gutter) 4px; }
+    .days::-webkit-scrollbar { display: none; }
+    .dchip {
+      flex: none; min-width: 48px; height: 50px; padding: 0 10px; border-radius: 14px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+      background: var(--surface); border: 1px solid var(--border); color: var(--text3);
+      transition: background-color .2s, color .2s, border-color .2s, transform .15s;
+    }
+    .dchip b { font-size: .92rem; font-weight: 700; }
+    .dchip small { font-size: .62rem; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .4px; }
+    .dchip:active { transform: scale(.93); }
+    .dchip.active { background: var(--primary-dim); border-color: var(--primary); color: var(--primary); animation: chipPop .4s var(--ease-spring); }
+    .dchip.active small { color: var(--primary); }
+    .results {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      margin-top: 12px; padding: 0 4px; font-size: .84rem; color: var(--text2);
+    }
+    .results b { color: var(--text); }
+    .link-btn { height: 34px; padding: 0 12px; border-radius: 10px; font-size: .82rem; font-weight: 700; color: var(--primary); background: var(--primary-dim); }
+    .elsewhere { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; }
 
     /* ══════════ BUTTONS ══════════ */
     .btn-primary {
@@ -407,9 +434,10 @@
     .toast button { height: 36px; padding: 0 14px; border-radius: 10px; font-weight: 700; color: var(--primary); background: var(--primary-dim); }
 
     /* ══════════ SHEETS (native <dialog>) ══════════ */
+    /* --kb / --vvh come from visualViewport so the sheet sits above the on-screen keyboard */
     .sheet {
-      position: fixed; inset: auto 0 0 0; margin: 0 auto;
-      width: 100%; max-width: 560px; max-height: calc(100dvh - 24px - env(safe-area-inset-top));
+      position: fixed; inset: auto 0 var(--kb, 0px) 0; margin: 0 auto;
+      width: 100%; max-width: 560px; max-height: calc(var(--vvh, 100dvh) - 12px - env(safe-area-inset-top));
       border: none; border-radius: 28px 28px 0 0; padding: 0;
       background: var(--surface-solid); color: var(--text);
       box-shadow: 0 -10px 60px rgba(0,0,0,.45), 0 1px 0 rgba(255,255,255,.08) inset;
@@ -493,6 +521,17 @@
     .form-error { min-height: 1.3em; margin-top: 10px; font-size: .84rem; font-weight: 500; color: var(--expense); text-align: center; }
     .sheet-actions { display: flex; gap: 10px; margin-top: 6px; }
 
+    .kb-open .sheet-inner { padding-bottom: 14px; }
+    .kb-open .sheet-head { padding: 6px 0 10px; }
+    .kb-open .seg { height: 44px; }
+    .kb-open .amount-field { padding-top: 10px; }
+    .kb-open #amount { font-size: 2.3rem; }
+    .kb-open .amount-line { margin: 8px auto 12px; }
+    .kb-open .field input { height: 48px; }
+    .kb-open .chips { margin-top: 8px; }
+    .kb-open .form-error { min-height: 0; margin-top: 6px; }
+    .kb-open .btn-primary, .kb-open .btn-danger { height: 50px; }
+
     /* settings */
     .set-label { font-size: .74rem; font-weight: 700; letter-spacing: .9px; text-transform: uppercase; color: var(--text2); margin: 4px 2px 10px; }
     #theme-seg { --count: 3; }
@@ -564,10 +603,11 @@
     /* page load */
     .topbar { animation: fadeIn .6s ease backwards; }
     .months { animation: rise .7s var(--ease-out) .05s backwards; }
+    .main > .list-head, .list-tools { animation: rise .6s var(--ease-out) .28s backwards; }
     /* first render, and month switches slide in the swipe direction */
     .enter .hero      { animation: rise .75s var(--ease-out) .1s backwards; }
     .enter .stat      { animation: rise .7s var(--ease-out) backwards; animation-delay: calc(var(--i) * 70ms + 200ms); }
-    .enter .list-head, .enter .carry-banner, .enter .empty { animation: rise .6s var(--ease-out) .3s backwards; }
+    .enter .carry-banner, .enter .empty, .enter .days { animation: rise .6s var(--ease-out) .3s backwards; }
     .enter .tx-day    { animation: rise .6s var(--ease-out) backwards; animation-delay: calc(min(var(--i), 8) * 60ms + 320ms); }
     .slide-next > *, .slide-next .stat { animation: fromRight .5s var(--ease-out) backwards; }
     .slide-prev > *, .slide-prev .stat { animation: fromLeft .5s var(--ease-out) backwards; }
@@ -575,6 +615,8 @@
     .slide-next .tx-day, .slide-prev .tx-day { animation-delay: calc(min(var(--i), 6) * 45ms + 60ms); }
     .nudge-l { animation: nudgeL .4s var(--ease-out); }
     .nudge-r { animation: nudgeR .4s var(--ease-out); }
+    .filtering .tx-day, .filtering .empty, .filtering .results { animation: rise .35s var(--ease-out) backwards; }
+    .filtering .tx-day { animation-delay: calc(min(var(--i), 6) * 30ms); }
     .tx-row.tx-new { animation: flash 2s ease-out .35s backwards; }
     .tx-row.leaving { animation: leave .26s cubic-bezier(.4,0,1,1) forwards; pointer-events: none; }
     .shake { animation: shake .4s ease; }
@@ -616,7 +658,7 @@
       .stats .carry { grid-column: auto; }
       .hero { padding: 26px 28px 22px; }
       .sheet {
-        inset: 0; margin: auto; height: fit-content; max-width: 460px;
+        inset: 0 0 var(--kb, 0px) 0; margin: auto; height: fit-content; max-width: 460px;
         border-radius: 28px; box-shadow: var(--shadow-lg), 0 1px 0 rgba(255,255,255,.08) inset;
       }
       .sheet[open] { animation: popIn .4s var(--ease-out); }
@@ -637,7 +679,7 @@
       .stats .carry { grid-column: 1 / -1; }
       .fab { display: none; }
       .topbar .btn-new { display: inline-flex; flex: none; height: var(--tap); padding: 0 18px; border-radius: 14px; font-size: .92rem; box-shadow: 0 6px 18px var(--primary-glow); }
-      .months { margin-left: 0; margin-right: 0; padding-left: 2px; padding-right: 2px; -webkit-mask-image: none; mask-image: none; }
+      .months { margin-left: -10px; margin-right: -10px; padding-left: 10px; padding-right: 10px; -webkit-mask-image: none; mask-image: none; }
     }
     @media (min-width: 1440px) { :root { --maxw: 1360px; } .layout { grid-template-columns: 440px minmax(0,1fr); } }
 
@@ -685,7 +727,21 @@
       <section id="summary" aria-label="Month summary"></section>
     </aside>
     <main class="main">
-      <section id="list" aria-label="Transactions"></section>
+      <div class="list-head">
+        <h2 class="section-title">Transactions</h2><span class="count" id="tx-count">0</span>
+        <span class="swipe-hint"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m8 7-5 5 5 5M16 7l5 5-5 5"/></svg>Swipe for months</span>
+      </div>
+      <div class="list-tools">
+        <label class="search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <span class="sr-only">Search transactions</span>
+          <input id="search" type="search" placeholder="Search description or amount" enterkeyhint="search" autocomplete="off" maxlength="60">
+          <button type="button" class="search-clear" id="search-clear" aria-label="Clear search" hidden>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </label>
+      </div>
+      <section id="list" aria-label="Transactions" aria-live="polite"></section>
     </main>
   </div>
 </div>
@@ -820,11 +876,13 @@ const CONFIG = {
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const $ = id => document.getElementById(id);
 const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
-const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch {} };
+const buzz = p => { try { if (navigator.vibrate && navigator.userActivation?.hasBeenActive !== false) navigator.vibrate(p); } catch {} };
 
 const STATE = {
   months: (() => { try { return JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEY) || '{}') || {}; } catch { return {}; } })(),
   editing: null,
+  query: '',
+  day: '',
   selectedMonth: null,
   lastActionTime: Date.now(),
   renderTimeout: null
@@ -1001,7 +1059,7 @@ const ICONS = {
   down: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 7 7 17M16 17H7V8"/></svg>`,
   carry:`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg>`,
   cal:  `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>`,
-  swipe:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m8 7-5 5 5 5M16 7l5 5-5 5"/></svg>`,
+  search:`<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>`,
   plus: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>`,
   empty:`<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20M6 15h4"/></svg>`
 };
@@ -1101,6 +1159,7 @@ const UI = {
   },
 
   money(v, sign) {
+    if (Math.abs(v) < 0.005) return `${Formatter.num(0)} €`;   // no "+0.00" / "−0.00"
     const s = sign === 'auto' ? (v < 0 ? '−' : '+') : (sign === '-' ? '−' : sign);
     return `${s}${Formatter.num(v)} €`;
   },
@@ -1127,37 +1186,87 @@ const UI = {
     });
   },
 
+  /* local calendar day of a timestamp, e.g. "2026-11-04" */
+  dayKey(ts) {
+    const d = new Date(ts);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  },
+  matches(t, q) {
+    if (!q) return true;
+    return t.desc.toLowerCase().includes(q) || t.amt.toFixed(2).includes(q.replace(',', '.'));
+  },
+  /* filter change: redraw only the list, with a quick fade instead of the full cascade */
+  refreshList() {
+    $('list').className = still() ? '' : 'filtering';
+    this.renderList();
+  },
+  clearFilters() {
+    STATE.query = ''; STATE.day = '';
+    $('search').value = '';
+    $('search-clear').hidden = true;
+  },
+
   renderList() {
     const c = $('list'), realCk = Formatter.getMonthKey(), key = this.current();
     const data = STATE.months[key];
     if (!data) { c.innerHTML = ''; return; }
     const k = this.esc(key);
+    const q = STATE.query.trim().toLowerCase(), day = STATE.day;
+    const filtering = !!(q || day);
 
-    let html = `<div class="list-head"><h2 class="section-title">Transactions</h2><span class="count">${data.tx.length}</span>
-      <span class="swipe-hint">${ICONS.swipe}Swipe for months</span></div>`;
+    // newest first; keep the real index for edit/delete
+    const order = data.tx.map((_, i) => i).sort((a, b) => data.tx[b].ts - data.tx[a].ts);
+    const shown = order.filter(i => (!day || this.dayKey(data.tx[i].ts) === day) && this.matches(data.tx[i], q));
+    $('tx-count').textContent = filtering ? `${shown.length}/${data.tx.length}` : data.tx.length;
 
-    if (data.carry !== 0) html += `
+    let html = '';
+    // day filter: one chip per day that has entries
+    const days = [...new Set(order.map(i => this.dayKey(data.tx[i].ts)))];
+    if (days.length > 1 || day) {
+      html += `<div class="days" role="group" aria-label="Filter by day">
+        <button type="button" class="dchip${day ? '' : ' active'}" data-day="" aria-pressed="${!day}"><b>All</b><small>days</small></button>
+        ${days.map(d => {
+          const dt = new Date(d + 'T12:00');
+          return `<button type="button" class="dchip${d === day ? ' active' : ''}" data-day="${d}" aria-pressed="${d === day}" aria-label="${dt.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}"><b>${dt.getDate()}</b><small>${dt.toLocaleDateString('en-GB', { weekday: 'short' })}</small></button>`;
+        }).join('')}</div>`;
+    }
+
+    if (filtering) {
+      const net = shown.reduce((s, i) => s + (data.tx[i].type === 'income' ? 1 : -1) * data.tx[i].amt, 0);
+      html += `<div class="results"><span><b>${shown.length}</b> found · ${this.money(net, 'auto')}</span><button type="button" class="link-btn" data-action="clear">Clear filters</button></div>`;
+    } else if (data.carry !== 0) {
+      html += `
       <div class="carry-banner">${ICONS.carry}<span class="ttl">Carried from previous month</span>
-        <span class="amt">${data.carry >= 0 ? '+' : '−'}${Formatter.num(data.carry)} €<small>≈ ${Formatter.convertToBGN(Math.abs(data.carry))} BGN</small></span></div>`;
+        <span class="amt">${this.money(data.carry, 'auto')}<small>≈ ${Formatter.convertToBGN(Math.abs(data.carry))} BGN</small></span></div>`;
+    }
 
     if (data.tx.length === 0) {
       html += `<div class="empty"><div class="empty-art">${ICONS.empty}</div>
         <b>No transactions in ${this.esc(Formatter.monthLabel(key))}</b>
-        ${key === realCk ? `Your income and expenses will show up here.<button type="button" class="btn-primary" data-action="add">${ICONS.plus}Add the first one</button>` : 'Nothing was recorded this month.'}
+        <p>${key === realCk ? 'Your income and expenses will show up here.' : 'Nothing was recorded this month.'}</p>
+        ${key === realCk ? `<button type="button" class="btn-primary" data-action="add">${ICONS.plus}Add the first one</button>` : ''}
+      </div>`;
+    } else if (shown.length === 0) {
+      // no match here: offer other months that do match the search
+      const other = q ? Object.keys(STATE.months).sort().reverse()
+        .filter(mk => mk !== key)
+        .map(mk => [mk, STATE.months[mk].tx.filter(t => this.matches(t, q)).length])
+        .filter(([, n]) => n) : [];
+      html += `<div class="empty"><div class="empty-art">${ICONS.search}</div>
+        <b>No matches${day ? ' on this day' : ''}</b>
+        <p>${other.length ? 'Found in other months:' : 'Try another word, amount or day.'}</p>
+        ${other.length ? `<div class="elsewhere">${other.map(([mk, n]) => `<button type="button" class="link-btn" data-goto="${this.esc(mk)}">${this.esc(Formatter.monthLabel(mk))} · ${n}</button>`).join('')}</div>` : ''}
       </div>`;
     } else {
-      // newest first, grouped by day; keep the real index for edit/delete
-      const order = data.tx.map((_, i) => i).sort((a, b) => data.tx[b].ts - data.tx[a].ts);
       const groups = [];
-      order.forEach(i => {
-        const day = new Date(data.tx[i].ts).toDateString();
-        const g = groups[groups.length - 1];
-        if (g && g.day === day) g.items.push(i); else groups.push({ day, items: [i] });
+      shown.forEach(i => {
+        const d = this.dayKey(data.tx[i].ts), g = groups[groups.length - 1];
+        if (g && g.day === d) g.items.push(i); else groups.push({ day: d, items: [i] });
       });
       groups.forEach((g, gi) => {
         const net = g.items.reduce((s, i) => s + (data.tx[i].type === 'income' ? 1 : -1) * data.tx[i].amt, 0);
         html += `<section class="tx-day" style="--i:${gi}">
-          <h3 class="day-label">${Formatter.dayLabel(data.tx[g.items[0]].ts)}<span>${net >= 0 ? '+' : '−'}${Formatter.num(net)} €</span></h3>
+          <h3 class="day-label">${Formatter.dayLabel(data.tx[g.items[0]].ts)}<span>${this.money(net, 'auto')}</span></h3>
           <div class="tx-group">`;
         g.items.forEach(i => {
           const t = data.tx[i], desc = this.esc(t.desc), sign = t.type === 'income' ? '+' : '−';
@@ -1172,12 +1281,15 @@ const UI = {
     }
     c.innerHTML = html;
     this._flashTs = null;
+    const act = c.querySelector('.dchip.active');
+    if (act && day) act.scrollIntoView({ block: 'nearest', inline: 'center' });
   },
 
   switchMonth(key) {
     const cur = this.current();
     if (key === cur) return;
     this._dir = key > cur ? 1 : -1;
+    STATE.day = '';   // a day belongs to one month; the search text stays
     STATE.selectedMonth = key === Formatter.getMonthKey() ? null : key;
     buzz(6);
     this.render();
@@ -1202,7 +1314,6 @@ const UI = {
     Sheet.open($('tx-sheet'));
   },
   startEdit(monthKey, idx) {
-    if (!Security.checkRateLimit()) return;
     const t = STATE.months[monthKey]?.tx[idx];
     if (!t) return;
     $('desc').value = t.desc;
@@ -1279,6 +1390,7 @@ const UI = {
     this._lastType = type;
     // New entries always land in the current month, so jump there
     if (isNew && STATE.selectedMonth) { STATE.selectedMonth = null; this._dir = 1; }
+    if (isNew) this.clearFilters();
     STATE.editing = null;
     buzz(14);
     Sheet.close($('tx-sheet'));
@@ -1474,6 +1586,7 @@ const FileManager = {
         DataManager.refreshAllCarries();
         DataManager.save();
         STATE.selectedMonth = null;
+        UI.clearFilters();
         UI._enter = true;
         UI.render();
         DataManager.showIndicator('✓ Imported successfully');
@@ -1551,8 +1664,26 @@ $('months-nav').addEventListener('wheel', e => {
 $('list').addEventListener('click', e => {
   const row = e.target.closest('.tx-row');
   if (row) return UI.startEdit(row.dataset.k, +row.dataset.i);
+  const chip = e.target.closest('.dchip');
+  if (chip) { STATE.day = chip.dataset.day; buzz(5); return UI.refreshList(); }
+  if (e.target.closest('[data-action="clear"]')) { UI.clearFilters(); return UI.refreshList(); }
+  const go = e.target.closest('[data-goto]');
+  if (go) return UI.switchMonth(go.dataset.goto);
   if (e.target.closest('[data-action="add"]')) UI.openNew();
 });
+
+let searchT;
+$('search').addEventListener('input', e => {
+  STATE.query = e.target.value;
+  $('search-clear').hidden = !e.target.value;
+  clearTimeout(searchT);
+  searchT = setTimeout(() => UI.refreshList(), 140);
+});
+$('search').addEventListener('keydown', e => {
+  if (e.key === 'Enter') e.target.blur();   // closes the phone keyboard to show results
+  if (e.key === 'Escape' && e.target.value) { e.stopPropagation(); UI.clearFilters(); UI.refreshList(); }
+});
+$('search-clear').addEventListener('click', () => { STATE.query = ''; $('search').value = ''; $('search-clear').hidden = true; UI.refreshList(); $('search').focus(); });
 
 $('export-btn').addEventListener('click', () => { Sheet.close(setSheet); FileManager.exportToTxt(); });
 $('import-btn').addEventListener('click', () => $('file-input').click());
@@ -1565,10 +1696,10 @@ $('guide-btn').addEventListener('click', () => { Sheet.close(setSheet); setTimeo
 /* Swipe left/right anywhere on the content to change month */
 (() => {
   const zone = document.querySelector('.layout');
-  zone.style.touchAction = 'pan-y pinch-zoom';
+  zone.style.touchAction = 'pan-y';
   let x0 = null, y0 = 0, t0 = 0;
   zone.addEventListener('pointerdown', e => {
-    if (e.pointerType === 'mouse' || e.target.closest('.months')) return;
+    if (e.pointerType === 'mouse' || e.target.closest('.months, .days, .search')) return;
     x0 = e.clientX; y0 = e.clientY; t0 = Date.now();
   });
   zone.addEventListener('pointerup', e => {
@@ -1588,7 +1719,31 @@ document.addEventListener('keydown', e => {
 });
 
 /* Glass top bar once scrolled; show the balance in it when the card is out of view */
-addEventListener('scroll', () => document.body.classList.toggle('scrolled', scrollY > 8), { passive: true });
+const onScroll = () => document.body.classList.toggle('scrolled', scrollY > 8);
+addEventListener('scroll', onScroll, { passive: true });
+onScroll();
+
+/* No page zoom on phones: viewport meta covers Android, iOS Safari ignores it so block its pinch gesture */
+['gesturestart', 'gesturechange'].forEach(t => document.addEventListener(t, e => e.preventDefault(), { passive: false }));
+
+/* Keep sheets above the on-screen keyboard (iOS overlays it instead of resizing the page) */
+if (window.visualViewport) {
+  const vv = visualViewport, root = document.documentElement;
+  const fit = () => {
+    const kb = Math.max(0, Math.round(innerHeight - vv.height - vv.offsetTop));
+    root.style.setProperty('--kb', kb + 'px');
+    root.style.setProperty('--vvh', Math.round(vv.height) + 'px');
+    // Android resizes the page instead, so also treat a much shorter viewport as "keyboard open"
+    root.classList.toggle('kb-open', kb > 120 || vv.height < screen.height * 0.6);
+  };
+  vv.addEventListener('resize', fit);
+  vv.addEventListener('scroll', fit);
+  fit();
+}
+/* Bring the focused field into view inside a sheet once the keyboard has opened */
+document.querySelectorAll('dialog.sheet').forEach(d => d.addEventListener('focusin', e => {
+  if (e.target.matches('input')) setTimeout(() => e.target.scrollIntoView({ block: 'nearest', behavior: still() ? 'auto' : 'smooth' }), 320);
+}));
 new IntersectionObserver(([e]) => {
   $('topbar').classList.toggle('show-mini', !e.isIntersecting && e.boundingClientRect.top < 0);
 }, { rootMargin: '-72px 0px 0px 0px' }).observe($('summary'));
