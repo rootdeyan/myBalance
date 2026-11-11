@@ -311,6 +311,7 @@
       padding-right: 22px; font-weight: 700; font-size: .9rem; color: #fff;
       background: linear-gradient(90deg, #ff8aa1, #e8364f);
     }
+    .tx-item:not(.swiping) .tx-del-bg { visibility: hidden; }
     .tx-del-bg svg { transition: transform .3s var(--ease-spring); }
     .tx-item.armed .tx-del-bg svg { transform: scale(1.25) rotate(-8deg); }
     .tx-row {
@@ -634,7 +635,7 @@
     @keyframes fromRight { from { opacity: 0; transform: translateX(28px); } }
     @keyframes fromLeft  { from { opacity: 0; transform: translateX(-28px); } }
     @keyframes rowIn     { from { opacity: 0; transform: translateY(10px); } }
-    @keyframes flash     { 0%,30% { background: var(--primary-dim); box-shadow: inset 3px 0 0 var(--primary); } 100% { background: transparent; box-shadow: inset 3px 0 0 transparent; } }
+    @keyframes flash     { 0%,30% { opacity: 1; } 100% { opacity: 0; } }
     @keyframes leave     { to { opacity: 0; transform: translateX(-40%) scale(.97); } }
     @keyframes sheetUp   { from { transform: translateY(100%); } }
     @keyframes sheetDown { to { transform: translateY(100%); } }
@@ -669,7 +670,12 @@
     .nudge-r { animation: nudgeR .4s var(--ease-out); }
     .filtering .tx-day, .filtering .empty, .filtering .results { animation: rise .35s var(--ease-out) backwards; }
     .filtering .tx-day { animation-delay: calc(min(var(--i), 6) * 30ms); }
-    .tx-row.tx-new { animation: flash 2s ease-out .35s backwards; }
+    .tx-row.tx-new::after {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: var(--primary-dim); box-shadow: inset 3px 0 0 var(--primary);
+      animation: flash 2s ease-out .35s both;
+    }
+    .tx-item.leaving .tx-del-bg { visibility: visible; }
     .tx-item.leaving { animation: leave .3s cubic-bezier(.4,0,1,1) forwards; pointer-events: none; }
     .tx-item.leaving .tx-row { transform: translateX(-100%) !important; transition: transform .3s cubic-bezier(.4,0,1,1); }
     .shake { animation: shake .4s ease; }
@@ -1436,7 +1442,12 @@ const UI = {
     const ok = await Confirm.ask(`"${t.desc}" (${t.type === 'income' ? '+' : '−'}${Formatter.num(t.amt)} €) will be removed. You can undo right after.`);
     if (ok) return this.removeTx(k, i);
     const item = this.itemEl(k, i);
-    if (item) { item.classList.remove('armed'); item.querySelector('.tx-row').style.transform = ''; }
+    if (item) { item.classList.remove('armed'); item.querySelector('.tx-row').style.transform = ''; this.unswipe(item); }
+  },
+  /* hide the red layer again once the row has sprung back */
+  unswipe(item) {
+    clearTimeout(item._t);
+    item._t = setTimeout(() => item.classList.remove('swiping'), 450);
   },
   itemEl(k, i) {
     return document.querySelector(`.tx-row[data-k="${CSS.escape(k)}"][data-i="${i}"]`)?.closest('.tx-item');
@@ -1855,7 +1866,7 @@ $('guide-btn').addEventListener('click', () => { Sheet.close(setSheet); setTimeo
 (() => {
   const list = $('list');
   let s = null;
-  const reset = row => { row.classList.remove('dragging'); row.style.transform = ''; row.parentElement.classList.remove('armed'); };
+  const reset = row => { row.classList.remove('dragging'); row.style.transform = ''; row.parentElement.classList.remove('armed'); UI.unswipe(row.parentElement); };
   list.addEventListener('pointerdown', e => {
     const row = e.target.closest('.tx-row');
     if (!row || e.pointerType === 'mouse') return;
@@ -1870,6 +1881,8 @@ $('guide-btn').addEventListener('click', () => { Sheet.close(setSheet); setTimeo
       s.locked = true;
       try { s.row.setPointerCapture(e.pointerId); } catch {}
       s.row.classList.add('dragging');
+      clearTimeout(s.row.parentElement._t);
+      s.row.parentElement.classList.add('swiping');
     }
     s.dx = Math.min(0, dx);
     const w = s.row.offsetWidth, x = s.dx < -w * 0.35 ? -w * 0.35 + (s.dx + w * 0.35) * 0.35 : s.dx;   // rubber band
