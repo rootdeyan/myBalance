@@ -253,6 +253,28 @@
     .hero.neg .hero-amount { color: var(--expense); }
     .hero-amount.long { font-size: clamp(1.9rem, 8.5vw, 2.5rem); }
     .hero-bgn { font-family: 'Roboto Mono', monospace; font-size: .8rem; color: var(--text2); margin-top: 8px; }
+    /* running-balance chart */
+    .spark { margin-top: 16px; }
+    .spark-plot { position: relative; height: 64px; }
+    .spark-plot svg { width: 100%; height: 100%; display: block; overflow: visible; }
+    .spk-a { stop-color: var(--primary); stop-opacity: .38; }
+    .spk-b { stop-color: var(--primary); stop-opacity: 0; }
+    .spk-l1 { stop-color: var(--primary); }
+    .spk-l2 { stop-color: var(--income); }
+    .hero.neg .spk-l2 { stop-color: var(--expense); }
+    .spk-area { fill: url(#spk-fill); }
+    .spk-path { fill: none; stroke: url(#spk-line); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    .spk-zero { stroke: var(--border-hi); stroke-width: 1; stroke-dasharray: 3 4; vector-effect: non-scaling-stroke; }
+    .spk-dot {
+      position: absolute; right: -5px; width: 10px; height: 10px; margin-top: -5px; border-radius: 50%;
+      background: var(--income); box-shadow: 0 0 0 3px var(--income-dim), 0 0 14px var(--income);
+    }
+    .hero.neg .spk-dot { background: var(--expense); box-shadow: 0 0 0 3px var(--expense-dim), 0 0 14px var(--expense); }
+    .spark-axis { display: flex; justify-content: space-between; margin-top: 6px; font-family: 'Roboto Mono', monospace; font-size: .68rem; color: var(--text2); }
+    @keyframes sparkDraw { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+    @keyframes dotIn { from { opacity: 0; transform: scale(.2); } }
+    .enter .spark-plot svg, .slide-next .spark-plot svg, .slide-prev .spark-plot svg { animation: sparkDraw 1.3s var(--ease-out) .35s backwards; }
+    .enter .spk-dot, .slide-next .spk-dot, .slide-prev .spk-dot { animation: dotIn .5s var(--ease-spring) 1.5s backwards; }
     .meter { margin-top: 18px; height: 8px; border-radius: 99px; background: var(--border-hi); overflow: hidden; }
     .meter-fill {
       display: block; height: 100%; border-radius: inherit; transform-origin: left;
@@ -571,6 +593,8 @@
       background: var(--expense-dim); color: var(--expense); animation: chipPop .5s var(--ease-spring);
     }
     .confirm-title { text-align: center; font-size: 1.2rem; font-weight: 700; }
+    .import-actions { display: grid; gap: 10px; }
+    .import-actions .import-cancel { background: transparent; color: var(--text2); }
     .confirm-body { text-align: center; color: var(--text2); font-size: .92rem; line-height: 1.5; margin: 8px 0 20px; overflow-wrap: anywhere; }
 
     .kb-open .sheet-inner { padding-bottom: 14px; }
@@ -748,6 +772,7 @@
   </style>
 </head>
 <body class="">
+<script>/* set the theme before first paint */try{var m=localStorage.getItem('salary-tracker-theme');document.body.dataset.theme=m||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');}catch(e){}</script>
 
 <!-- TOP BAR -->
 <header class="topbar" id="topbar">
@@ -898,6 +923,20 @@
   </div>
 </dialog>
 
+<!-- RESTORE CHOICE -->
+<dialog class="sheet" id="import-sheet" aria-labelledby="import-title" aria-describedby="import-body">
+  <div class="sheet-grab"><span class="grabber"></span></div>
+  <div class="sheet-inner" style="padding-top:14px">
+    <h2 class="confirm-title" id="import-title">Load this backup?</h2>
+    <p class="confirm-body" id="import-body"></p>
+    <div class="import-actions">
+      <button type="button" class="btn-ghost" id="import-merge">Merge with my entries</button>
+      <button type="button" class="btn-danger wide" id="import-replace">Replace all my entries</button>
+      <button type="button" class="btn-ghost import-cancel" data-close>Cancel</button>
+    </div>
+  </div>
+</dialog>
+
 <!-- SETTINGS SHEET -->
 <dialog class="sheet" id="settings-sheet" aria-labelledby="settings-title">
   <div class="sheet-grab"><span class="grabber"></span></div>
@@ -1041,6 +1080,10 @@ const Formatter = {
   },
   convertToBGN(eur) {
     return (eur * CONFIG.EUR_TO_BGN).toFixed(2);
+  },
+  /* on screen only: grouped like the euro figures; backups keep convertToBGN */
+  bgn(eur) {
+    return this.num(eur * CONFIG.EUR_TO_BGN);
   },
   /* 1234.5 → "1 234.50" (display only; backups keep plain numbers) */
   num(n) {
@@ -1218,7 +1261,7 @@ const UI = {
         <div class="stat-txt">
           <div class="stat-label">${label}</div>
           <div class="stat-val" data-count="${v}" data-key="${key}" data-sign="${sign}">${this.money(v, sign)}</div>
-          <div class="stat-bgn">≈ ${Formatter.convertToBGN(Math.abs(v))} BGN</div>
+          <div class="stat-bgn">≈ ${Formatter.bgn(v)} BGN</div>
         </div>
       </div>`;
 
@@ -1236,7 +1279,8 @@ const UI = {
           <span class="hero-month">${ICONS.cal}${this.esc(Formatter.monthLabel(ck))}</span>
         </div>
         <div class="hero-amount${Math.abs(balance) >= 100000 ? ' long' : ''}" data-count="${balance}" data-key="bal" data-sign="auto" data-big="1">${this.moneyBig(balance)}</div>
-        <div class="hero-bgn">≈ ${Formatter.convertToBGN(Math.abs(balance))} BGN</div>
+        <div class="hero-bgn">≈ ${Formatter.bgn(balance)} BGN</div>
+        ${this.sparkline(ck, cm)}
         ${meter}
       </div>
       <div class="stats${carry !== 0 ? ' three' : ''}">
@@ -1253,6 +1297,45 @@ const UI = {
     const mini = $('mini-bal');
     mini.textContent = `Balance ${this.money(balance, 'auto')}`;
     mini.classList.toggle('neg', balance < 0);
+  },
+
+  /* the month's running balance, one point per day, starting from the carried-over amount */
+  sparkline(ck, cm) {
+    if (cm.tx.length < 2) return '';
+    const [y, m] = ck.split('-').map(Number);
+    const daysInMonth = new Date(y, m, 0).getDate();
+    const isCur = ck === Formatter.getMonthKey();
+    const lastDay = isCur ? new Date().getDate() : daysInMonth;
+    if (lastDay < 2) return '';
+    const perDay = new Array(daysInMonth + 1).fill(0);
+    cm.tx.forEach(t => {
+      const d = new Date(t.ts);
+      // entries dated outside the month (edited or imported) still count, at its first or last day
+      const day = d.getFullYear() * 12 + d.getMonth() < y * 12 + m - 1 ? 1 : d.getFullYear() * 12 + d.getMonth() > y * 12 + m - 1 ? lastDay : Math.min(d.getDate(), lastDay);
+      perDay[day] += (t.type === 'income' ? 1 : -1) * t.amt;
+    });
+    let run = cm.carry;
+    const pts = [run];
+    for (let d = 1; d <= lastDay; d++) { run += perDay[d]; pts.push(run); }
+    const min = Math.min(...pts), max = Math.max(...pts), span = (max - min) || 1;
+    const W = 300, H = 64, pad = 6;
+    const yOf = v => pad + (1 - (v - min) / span) * (H - 2 * pad);
+    const line = pts.map((v, i) => `${(i / (pts.length - 1) * W).toFixed(1)} ${yOf(v).toFixed(1)}`).join(' L');
+    const zero = min < 0 && max > 0 ? `<line class="spk-zero" x1="0" x2="${W}" y1="${yOf(0).toFixed(1)}" y2="${yOf(0).toFixed(1)}"/>` : '';
+    const mon = MONTH_NAMES[m - 1];
+    return `<div class="spark" role="img" aria-label="Running balance through ${this.esc(Formatter.monthLabel(ck))}, from ${this.money(pts[0], 'auto')} to ${this.money(run, 'auto')}">
+      <div class="spark-plot">
+        <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="spk-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="spk-a"/><stop offset="1" class="spk-b"/></linearGradient>
+            <linearGradient id="spk-line" x1="0" y1="0" x2="1" y2="0"><stop offset="0" class="spk-l1"/><stop offset="1" class="spk-l2"/></linearGradient>
+          </defs>
+          ${zero}<path class="spk-area" d="M${line} L${W} ${H} L0 ${H} Z"/><path class="spk-path" d="M${line}" vector-effect="non-scaling-stroke"/>
+        </svg>
+        <span class="spk-dot" style="top:${(yOf(run) / H * 100).toFixed(1)}%" aria-hidden="true"></span>
+      </div>
+      <div class="spark-axis" aria-hidden="true"><span>1 ${mon}</span><span>${isCur ? 'Today' : lastDay + ' ' + mon}</span></div>
+    </div>`;
   },
 
   money(v, sign) {
@@ -1334,7 +1417,7 @@ const UI = {
     } else if (data.carry !== 0) {
       html += `
       <div class="carry-banner">${ICONS.carry}<span class="ttl">Carried from previous month</span>
-        <span class="amt">${this.money(data.carry, 'auto')}<small>≈ ${Formatter.convertToBGN(Math.abs(data.carry))} BGN</small></span></div>`;
+        <span class="amt">${this.money(data.carry, 'auto')}<small>≈ ${Formatter.bgn(data.carry)} BGN</small></span></div>`;
     }
 
     if (data.tx.length === 0) {
@@ -1370,7 +1453,7 @@ const UI = {
           html += `<div class="tx-item"><div class="tx-del-bg" aria-hidden="true">${ICONS.trash}Delete</div><button type="button" class="tx-row ${t.type}${t.ts === this._flashTs ? ' tx-new' : ''}" data-k="${k}" data-i="${i}" aria-label="${desc}, ${sign}${t.amt.toFixed(2)} euro. Open to edit or delete">
             <span class="tx-ico">${t.type === 'income' ? ICONS.up : ICONS.down}</span>
             <span class="tx-main"><span class="tx-desc">${desc}</span><span class="tx-meta">${Formatter.time(t.ts)}</span></span>
-            <span class="tx-amount"><span class="tx-eur">${sign}${Formatter.num(t.amt)} €</span><span class="tx-bgn">≈ ${Formatter.convertToBGN(t.amt)} BGN</span></span>
+            <span class="tx-amount"><span class="tx-eur">${sign}${Formatter.num(t.amt)} €</span><span class="tx-bgn">≈ ${Formatter.bgn(t.amt)} BGN</span></span>
           </button></div>`;
         });
         html += `</div></section>`;
@@ -1432,7 +1515,7 @@ const UI = {
     $('act-ico').innerHTML = t.type === 'income' ? ICONS.up : ICONS.down;
     $('act-desc').textContent = t.desc;
     $('act-date').textContent = new Date(t.ts).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-    $('act-amt').innerHTML = `${sign}${Formatter.num(t.amt)} €<small>≈ ${Formatter.convertToBGN(t.amt)} BGN</small>`;
+    $('act-amt').innerHTML = `${sign}${Formatter.num(t.amt)} €<small>≈ ${Formatter.bgn(t.amt)} BGN</small>`;
     Sheet.open($('act-sheet'));
   },
   /* ask first; on "no" the swiped row springs back */
@@ -1478,7 +1561,7 @@ const UI = {
     if (clean !== el.value) el.value = clean;
     el.style.width = Math.max(4.5, clean.length + 0.5) + 'ch';
     const v = Formatter.parseAmount(clean);
-    $('amount-bgn').textContent = `≈ ${Formatter.convertToBGN(isNaN(v) ? 0 : v)} BGN`;
+    $('amount-bgn').textContent = `≈ ${Formatter.bgn(isNaN(v) ? 0 : v)} BGN`;
   },
   /* recent descriptions of the chosen type as one-tap chips */
   renderSuggest() {
@@ -1691,14 +1774,15 @@ const FileManager = {
   importFromTxt(file) {
     try {
       const reader = new FileReader();
-      reader.onload = e => {
+      reader.onload = async e => {
         const imported = this.parseTxt(e.target.result);
         if (!imported || Object.keys(imported).length === 0) {
           DataManager.showIndicator('✕ Invalid file format');
           return;
         }
-        const replace = confirm('Replace all data with imported data?\n\nOK = Replace\nCancel = Merge');
-        if (replace) {
+        const choice = await ImportChoice.ask(Object.keys(imported).length);
+        if (!choice) return;
+        if (choice === 'replace') {
           STATE.months = imported;
         } else {
           Object.keys(imported).forEach(mk => {
@@ -1780,6 +1864,22 @@ Sheet.init(actSheet);
 Sheet.init($('confirm-sheet'));
 $('act-edit').addEventListener('click', () => { const a = UI._act; Sheet.close(actSheet); UI.startEdit(a.k, a.i); });
 $('act-del').addEventListener('click', () => { const a = UI._act; Sheet.close(actSheet); UI.confirmDelete(a.k, a.i); });
+
+/* ImportChoice.ask(months) → 'merge' | 'replace' | null (Cancel, backdrop, Esc, drag-down) */
+const ImportChoice = {
+  d: $('import-sheet'),
+  ask(n) {
+    $('import-body').textContent = `The file holds ${n} ${n === 1 ? 'month' : 'months'}. Merge adds the entries you don't have yet. Replace deletes everything here first.`;
+    return new Promise(res => {
+      let pick = null;
+      $('import-merge').onclick = () => { pick = 'merge'; Sheet.close(this.d); };
+      $('import-replace').onclick = () => { pick = 'replace'; Sheet.close(this.d); };
+      this.d.addEventListener('sheetclose', () => res(pick), { once: true });
+      Sheet.open(this.d);
+    });
+  }
+};
+Sheet.init(ImportChoice.d);
 
 /* Confirm.ask(text) → Promise<boolean>; Cancel, backdrop, Esc or drag-down all mean "no" */
 const Confirm = {
